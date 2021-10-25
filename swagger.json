@@ -1,0 +1,140 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Airport fuel inventory",
+    "description": "Airport fuel inventory app",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:4000"
+    }
+  ],
+  "tags": [
+    {
+      "name": "user",
+      "description": "User apis"
+    }
+  ],
+  "paths": {
+    "/api/v1/user/login": {
+      "description": "login",
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "description": "login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/user"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "msg": {
+                      "type": "string",
+                      "description": "message",
+                      "example": "Succssfully login"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user": {
+      "description": "Create user",
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "description": "Create user",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/user"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "msg": {
+                      "type": "string",
+                      "description": "message",
+                      "example": "Succssfully created"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user/logout": {
+      "description": "Logout",
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "description": "Logout",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "msg": {
+                      "type": "string",
+                      "description": "message",
+                      "example": "Logout"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "user": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "suman@gt.com"
+          },
+          "password": {
+            "type": "string",
+            "example": "demo password"
+          }
+        }
+      }
+    }
+  }
+}

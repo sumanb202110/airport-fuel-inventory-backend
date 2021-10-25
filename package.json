@@ -1,0 +1,19 @@
+{
+  "name": "airport-fuel-inventory-backend",
+  "version": "1.0.0",
+  "description": "Airport fuel inventory management system backend using node and express",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Suman Kumar Bhadra",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.0.1",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^6.0.11",
+    "swagger-ui-express": "^4.1.6"
+  }
+}
