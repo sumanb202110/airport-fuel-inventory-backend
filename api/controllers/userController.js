@@ -10,6 +10,10 @@ const jwtexpirySecond = 3600 * 24
 const login = async (req, res, next) => {
     try {
         const result = await User.find({ email: req.body.email })
+        if(result[0] === undefined || result[0].password === undefined)
+        {
+            return res.status(401).json({ msg: "Invalid user email" }).send()
+        }
 
         if (result) {
             bcrypt.compare(req.body.password, result[0].password).then(

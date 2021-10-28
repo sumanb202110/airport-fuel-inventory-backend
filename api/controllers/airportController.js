@@ -7,7 +7,6 @@ const Airport = require("../../models/airport")
 const getAirport = async (req, res, next) => {
     try {
         const result = await Airport.find()
-        console.log(result)
         return res.status(200).json([...result.map((data) => {
             return {
                 airport_id: data.airport_id,
@@ -15,7 +14,7 @@ const getAirport = async (req, res, next) => {
                 fuel_capacity: data.fuel_capacity,
                 fuel_available: data.fuel_available
             }
-        })]).send()
+        })])
     } catch (err) {
         console.log(err)
         res.status(400).json({
@@ -27,6 +26,35 @@ const getAirport = async (req, res, next) => {
 // Create operation
 const createAirport = async (req, res, next) => {
     try {
+
+        if(parseInt(req.body.fuel_available) > parseInt(req.body.fuel_capacity)){
+            return  res.status(400).json({
+                msg: "Fuel available can not be greater then fuel capacity"
+            })
+        }
+        if(parseInt(req.body.fuel_available) < 0){
+            return  res.status(400).json({
+                msg: "Fuel available can not be negative"
+            })
+        }
+
+        if(parseInt(req.body.fuel_capacity) < 0){
+            return  res.status(400).json({
+                msg: "Fuel available can not be negative"
+            })
+        }
+        if(req.body.airport_id === "" || req.body.airport_id === undefined){
+            return  res.status(400).json({
+                msg: "Please provide airport id"
+            })
+        }
+        if(req.body.airport_name === "" || req.body.airport_name === undefined){
+            return  res.status(400).json({
+                msg: "Please provide airport name"
+            })
+        }
+
+
         const airport = new Airport({
             airport_id: req.body.airport_id,
             airport_name: req.body.airport_name,
@@ -38,7 +66,7 @@ const createAirport = async (req, res, next) => {
         console.log(result)
         res.status(201).json({
             msg: "Airport successfully created"
-        }).send()
+        })
 
     } catch (err) {
         console.log(err)

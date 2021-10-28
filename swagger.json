@@ -12,16 +12,28 @@
   ],
   "tags": [
     {
-      "name": "user",
+      "name": "users",
       "description": "User apis"
+    },
+    {
+      "name": "airports",
+      "description": "airports apis"
+    },
+    {
+      "name": "aircrafts",
+      "description": "aircrafts apis"
+    },
+    {
+      "name": "transactions",
+      "description": "transactions apis"
     }
   ],
   "paths": {
-    "/api/v1/user/login": {
+    "/api/v1/users/login": {
       "description": "login",
       "post": {
         "tags": [
-          "user"
+          "users"
         ],
         "description": "login",
         "requestBody": {
@@ -54,11 +66,11 @@
         }
       }
     },
-    "/api/v1/user": {
+    "/api/v1/users": {
       "description": "Create user",
       "post": {
         "tags": [
-          "user"
+          "users"
         ],
         "description": "Create user",
         "requestBody": {
@@ -91,11 +103,11 @@
         }
       }
     },
-    "/api/v1/user/logout": {
+    "/api/v1/users/logout": {
       "description": "Logout",
       "post": {
         "tags": [
-          "user"
+          "users"
         ],
         "description": "Logout",
         "responses": {
@@ -118,6 +130,180 @@
           }
         }
       }
+    },
+    "/api/v1/airports": {
+      "description": "Create airports",
+      "post": {
+        "tags": [
+          "airports"
+        ],
+        "description": "Create airports",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/airport"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "msg": {
+                      "type": "string",
+                      "description": "message",
+                      "example": "Succssfully created"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "airports"
+        ],
+        "description": "Get airports",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/airport"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/aircrafts": {
+      "description": "Create aircrafts",
+      "post": {
+        "tags": [
+          "aircrafts"
+        ],
+        "description": "Create aircrafts",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/aircraft"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "msg": {
+                      "type": "string",
+                      "description": "message",
+                      "example": "Succssfully created"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "aircrafts"
+        ],
+        "description": "Get aircrafts",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/aircraft"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/transactions": {
+      "description": "Create transactions",
+      "post": {
+        "tags": [
+          "transactions"
+        ],
+        "description": "Create transactions",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/transaction"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "msg": {
+                      "type": "string",
+                      "description": "message",
+                      "example": "Succssfully created"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "transactions"
+        ],
+        "description": "Get transactions",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/transaction"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -132,6 +318,77 @@
           "password": {
             "type": "string",
             "example": "demo password"
+          }
+        }
+      },
+      "airport": {
+        "type": "object",
+        "properties": {
+          "airport_id": {
+            "type": "string",
+            "example": "test"
+          },
+          "airport_name": {
+            "type": "string",
+            "example": "test"
+          },
+          "fuel_capacity": {
+            "type": "string",
+            "example": "test"
+          },
+          "fuel_available": {
+            "type": "string",
+            "example": "test"
+          }
+        }
+      },
+      "aircraft": {
+        "type": "object",
+        "properties": {
+          "aircraft_id": {
+            "type": "string",
+            "example": "test"
+          },
+          "aircraft_no": {
+            "type": "string",
+            "example": "test"
+          },
+          "airline": {
+            "type": "string",
+            "example": "test"
+          }
+        }
+      },
+      "transaction": {
+        "type": "object",
+        "properties": {
+          "transaction_id": {
+            "type": "string",
+            "example": "test"
+          },
+          "transaction_date_time": {
+            "type": "string",
+            "example": "test"
+          },
+          "transaction_type": {
+            "type": "string",
+            "example": "test"
+          },
+          "airport_id": {
+            "type": "string",
+            "example": "test"
+          },
+          "aircraft_id": {
+            "type": "string",
+            "example": "test"
+          },
+          "quantity": {
+            "type": "number",
+            "example": 100
+          },
+          "transaction_id_parent": {
+            "type": "string",
+            "example": "test"
           }
         }
       }
