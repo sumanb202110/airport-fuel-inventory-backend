@@ -326,19 +326,19 @@
         "properties": {
           "airport_id": {
             "type": "string",
-            "example": "test"
+            "example": "test airport id"
           },
           "airport_name": {
             "type": "string",
-            "example": "test"
+            "example": "test airport name"
           },
           "fuel_capacity": {
-            "type": "string",
-            "example": "test"
+            "type": "number",
+            "example": 5000
           },
           "fuel_available": {
-            "type": "string",
-            "example": "test"
+            "type": "number",
+            "example": 2000
           }
         }
       },
@@ -347,15 +347,15 @@
         "properties": {
           "aircraft_id": {
             "type": "string",
-            "example": "test"
+            "example": "test aircraft id"
           },
           "aircraft_no": {
             "type": "string",
-            "example": "test"
+            "example": "test aircraft number"
           },
           "airline": {
             "type": "string",
-            "example": "test"
+            "example": "test airline"
           }
         }
       },
@@ -364,23 +364,23 @@
         "properties": {
           "transaction_id": {
             "type": "string",
-            "example": "test"
+            "example": "test id"
           },
           "transaction_date_time": {
             "type": "string",
-            "example": "test"
+            "example": "test date"
           },
           "transaction_type": {
             "type": "string",
-            "example": "test"
+            "example": "IN"
           },
           "airport_id": {
             "type": "string",
-            "example": "test"
+            "example": "test airport id"
           },
           "aircraft_id": {
             "type": "string",
-            "example": "test"
+            "example": "test aircraft id"
           },
           "quantity": {
             "type": "number",
@@ -388,7 +388,7 @@
           },
           "transaction_id_parent": {
             "type": "string",
-            "example": "test"
+            "example": "test transaction id"
           }
         }
       }
