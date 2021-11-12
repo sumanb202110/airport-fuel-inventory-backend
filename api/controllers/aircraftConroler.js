@@ -70,8 +70,69 @@ const createAircraft = async (req, res, next) => {
     }
 }
 
+// Update operation
+const updateAircraft = async (req, res, next) => {
+    try {
+
+        if(req.body.aircraft_id === "" || req.body.aircraft_id === undefined){
+            return  res.status(400).json({
+                msg: "Please provide aircraft id"
+            })
+        }
+
+        if(req.body.aircraft_no === "" || req.body.aircraft_no === undefined){
+            return  res.status(400).json({
+                msg: "Please provide aircraft no"
+            })
+        }
+
+        if(req.body.airline === "" || req.body.airline === undefined){
+            return  res.status(400).json({
+                msg: "Please provide airline"
+            })
+        }
+        
+
+      
+        const result = await Aircraft.findOneAndUpdate({aircraft_id: req.body.aircraft_id},{
+            aircraft_no: req.body.aircraft_no,
+            airline: req.body.airline
+        })
+        console.log(result)
+        res.status(200).json({
+            msg: "Aircraft successfully Updated"
+        })
+
+    } catch (err) {
+        console.log(err)
+        if (err.code === 11000) {
+            return res.status(400).json({
+                msg: "Duplicate entry"
+            }).send()
+        }
+        res.status(400).json({
+            msg: "Error"
+        }).send()
+    }
+}
+
+// Delete operation
+const deleteAircraft = async (req, res, next) => {
+    try {
+        const result = await Aircraft.deleteOne({aircraft_id: req.params.aircraft_id})
+        return res.status(204).send()
+    } catch (err) {
+        console.log(err)
+        res.status(400).json({
+            msg: "Error"
+        })
+    }
+}
+
 
 module.exports = {
     getAircraft,
-    createAircraft
+    createAircraft,
+    updateAircraft,
+    deleteAircraft
 }

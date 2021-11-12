@@ -6,7 +6,7 @@ const transactionSchema = mongoose.Schema({
     transaction_type: String,
     airport_id: String,
     aircraft_id: String,
-    quantity: String,
+    quantity: Number,
     transaction_id_parent: String
 })
 

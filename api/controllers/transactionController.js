@@ -10,9 +10,9 @@ const getTransaction = async (req, res, next) => {
     const page = req.query.page
     const count = req.query.count
     try {
-        const resultWithPage = await Transaction.find().skip((parseInt(page)-1) * parseInt(count)).limit(parseInt(count))
+        const resultWithPage = await Transaction.find().skip((parseInt(page) - 1) * parseInt(count)).limit(parseInt(count))
         const resultWithoutPage = await Transaction.find()
-        const result = pagination === "true" ? resultWithPage : resultWithoutPage 
+        const result = pagination === "true" ? resultWithPage : resultWithoutPage
         return res.status(200).json([...result.map((data) => {
             return {
                 transaction_id: data.transaction_id,
@@ -35,20 +35,20 @@ const getTransaction = async (req, res, next) => {
 // Create operation
 const createTransaction = async (req, res, next) => {
     try {
-        if(req.body.airport_id === "" || req.body.airport_id === undefined){
-            return  res.status(400).json({
+        if (req.body.airport_id === "" || req.body.airport_id === undefined) {
+            return res.status(400).json({
                 msg: "Please provide airport id"
             })
         }
 
-        if(req.body.transaction_type === "" || req.body.transaction_type === undefined){
-            return  res.status(400).json({
+        if (req.body.transaction_type === "" || req.body.transaction_type === undefined) {
+            return res.status(400).json({
                 msg: "Please provide transaction type"
             })
         }
 
-        if(req.body.transaction_type === "OUT" && (req.body.aircraft_id === undefined || req.body.aircraft_id === "")){
-            return  res.status(400).json({
+        if (req.body.transaction_type === "OUT" && (req.body.aircraft_id === undefined || req.body.aircraft_id === "")) {
+            return res.status(400).json({
                 msg: "Please provide aircraftid in OUT transaction"
             })
         }
@@ -76,7 +76,7 @@ const createTransaction = async (req, res, next) => {
                     { $inc: { fuel_available: req.body.transaction_type === 'OUT' ? -req.body.quantity : req.body.quantity } }, opts);
 
                 // Check fuel available must not be greater then fuel capacity
-                if(parseInt(airportUpdateResult.fuel_available) > airportUpdateResult.fuel_capacity){
+                if (parseInt(airportUpdateResult.fuel_available) > airportUpdateResult.fuel_capacity) {
                     await session.abortTransaction();
                     session.endSession();
                     console.log("Fuel available can not be greater then fuel capacity")
@@ -86,7 +86,7 @@ const createTransaction = async (req, res, next) => {
                 }
 
                 // Check fuel available must not be negative
-                if(parseInt(airportUpdateResult.fuel_available) < 0){
+                if (parseInt(airportUpdateResult.fuel_available) < 0) {
                     await session.abortTransaction();
                     session.endSession();
                     console.log("Fuel available can not be negative")
@@ -95,7 +95,7 @@ const createTransaction = async (req, res, next) => {
                     })
                 }
                 const transactionCreateResult = await transaction.save(opts);
-                
+
 
 
                 await session.commitTransaction();
@@ -135,7 +135,122 @@ const createTransaction = async (req, res, next) => {
 }
 
 
+// Update operation
+const updateTransaction = async (req, res, next) => {
+    try {
+        if (req.body.airport_id === "" || req.body.airport_id === undefined) {
+            return res.status(400).json({
+                msg: "Please provide airport id"
+            })
+        }
+
+        if (req.body.transaction_type === "" || req.body.transaction_type === undefined) {
+            return res.status(400).json({
+                msg: "Please provide transaction type"
+            })
+        }
+
+        if (req.body.transaction_type === "OUT" && (req.body.aircraft_id === undefined || req.body.aircraft_id === "")) {
+            return res.status(400).json({
+                msg: "Please provide aircraftid in OUT transaction"
+            })
+        }
+
+
+        await updateFuelInventory();
+
+        async function updateFuelInventory() {
+            const session = await Airport.startSession();
+            session.startTransaction();
+
+            try {
+                const opts = { session };
+                const airportUpdateResult = await Airport.findOneAndUpdate(
+                    { airport_id: req.body.airport_id },
+                    { $inc: { fuel_available: req.body.transaction_type === 'OUT' ? -req.body.quantity : req.body.quantity } }, opts);
+
+                // Check fuel available must not be greater then fuel capacity
+                if (parseInt(airportUpdateResult.fuel_available) > airportUpdateResult.fuel_capacity) {
+                    await session.abortTransaction();
+                    session.endSession();
+                    console.log("Fuel available can not be greater then fuel capacity")
+                    return res.status(201).json({
+                        msg: "Fuel available can not be greater then fuel capacity"
+                    })
+                }
+
+                // Check fuel available must not be negative
+                if (parseInt(airportUpdateResult.fuel_available) < 0) {
+                    await session.abortTransaction();
+                    session.endSession();
+                    console.log("Fuel available can not be negative")
+                    return res.status(201).json({
+                        msg: "Fuel available can not be negative"
+                    })
+                }
+                const transactionCreateResult = await Transaction.findOneAndUpdate({ transaction_id: req.body.transaction_id }, {
+                    transaction_type: req.body.transaction_type,
+                    airport_id: req.body.airport_id,
+                    aircraft_id: req.body.aircraft_id,
+                    quantity: req.body.quantity,
+                }, opts);
+
+
+
+                await session.commitTransaction();
+                session.endSession();
+
+                res.status(201).json({
+                    msg: "New transaction successfully updated"
+                })
+            } catch (error) {
+                // If an error occurred, abort the whole transaction and
+                // undo any changes that might have happened
+                await session.abortTransaction();
+                session.endSession();
+                console.log(error)
+                return res.status(400).json({
+                    msg: "Error"
+                }).send()
+            }
+        }
+
+
+
+
+
+    } catch (err) {
+        console.log(err)
+        if (err.code === 11000) {
+            res.status(400).json({
+                msg: "Duplicate entry"
+            })
+        }
+        res.status(400).json({
+            msg: "Error"
+        })
+    }
+
+}
+
+// Delete operation
+const deleteTransaction = async (req, res, next) => {
+    
+    try {
+        const result = await Transaction.deleteOne({transaction_id: req.params.transaction_id})
+        return res.status(204).send()
+    } catch (err) {
+        console.log(err)
+        res.status(400).json({
+            msg: "Error"
+        }).send()
+    }
+}
+
+
 module.exports = {
     getTransaction,
-    createTransaction
+    createTransaction,
+    updateTransaction,
+    deleteTransaction
 }

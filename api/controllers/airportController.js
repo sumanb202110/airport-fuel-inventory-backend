@@ -27,29 +27,29 @@ const getAirport = async (req, res, next) => {
 const createAirport = async (req, res, next) => {
     try {
 
-        if(parseInt(req.body.fuel_available) > parseInt(req.body.fuel_capacity)){
-            return  res.status(400).json({
+        if (parseInt(req.body.fuel_available) > parseInt(req.body.fuel_capacity)) {
+            return res.status(400).json({
                 msg: "Fuel available can not be greater then fuel capacity"
             })
         }
-        if(parseInt(req.body.fuel_available) < 0){
-            return  res.status(400).json({
+        if (parseInt(req.body.fuel_available) < 0) {
+            return res.status(400).json({
                 msg: "Fuel available can not be negative"
             })
         }
 
-        if(parseInt(req.body.fuel_capacity) < 0){
-            return  res.status(400).json({
+        if (parseInt(req.body.fuel_capacity) < 0) {
+            return res.status(400).json({
                 msg: "Fuel available can not be negative"
             })
         }
-        if(req.body.airport_id === "" || req.body.airport_id === undefined){
-            return  res.status(400).json({
+        if (req.body.airport_id === "" || req.body.airport_id === undefined) {
+            return res.status(400).json({
                 msg: "Please provide airport id"
             })
         }
-        if(req.body.airport_name === "" || req.body.airport_name === undefined){
-            return  res.status(400).json({
+        if (req.body.airport_name === "" || req.body.airport_name === undefined) {
+            return res.status(400).json({
                 msg: "Please provide airport name"
             })
         }
@@ -81,8 +81,85 @@ const createAirport = async (req, res, next) => {
     }
 }
 
+// Update operation
+const updateAirport = async (req, res, next) => {
+    try {
+
+        if (parseInt(req.body.fuel_available) > parseInt(req.body.fuel_capacity)) {
+            return res.status(400).json({
+                msg: "Fuel available can not be greater then fuel capacity"
+            })
+        }
+        if (parseInt(req.body.fuel_available) < 0) {
+            return res.status(400).json({
+                msg: "Fuel available can not be negative"
+            })
+        }
+
+        if (parseInt(req.body.fuel_capacity) < 0) {
+            return res.status(400).json({
+                msg: "Fuel available can not be negative"
+            })
+        }
+        if (req.body.airport_id === "" || req.body.airport_id === undefined) {
+            return res.status(400).json({
+                msg: "Please provide airport id"
+            })
+        }
+        if (req.body.airport_name === "" || req.body.airport_name === undefined) {
+            return res.status(400).json({
+                msg: "Please provide airport name"
+            })
+        }
+
+
+        const airport = new Airport({
+            fuel_capacity: req.body.fuel_capacity,
+            fuel_available: req.body.fuel_available
+        })
+        const result = await Airport.findOneAndUpdate({ airport_id: req.body.airport_id },
+            {
+                airport_name: req.body.airport_name,
+                fuel_capacity: req.body.fuel_capacity,
+                fuel_available: req.body.fuel_available
+            }
+        )
+
+        console.log(result)
+        res.status(200).json({
+            msg: "Airport successfully updated"
+        })
+
+    } catch (err) {
+        console.log(err)
+        if (err.code === 11000) {
+            return res.status(400).json({
+                msg: "Duplicate entry"
+            }).send()
+        }
+        res.status(400).json({
+            msg: "Error"
+        }).send()
+    }
+}
+
+// Delete Airport
+const deleteAirport = async (req, res, next) => {
+    try {
+        const result = await Airport.deleteOne({airport_id: req.params.airport_id})
+        return res.status(204).send()
+    } catch (err) {
+        console.log(err)
+        res.status(400).json({
+            msg: "Error"
+        }).send()
+    }
+}
+
 
 module.exports = {
     getAirport,
-    createAirport
+    createAirport,
+    updateAirport,
+    deleteAirport
 }

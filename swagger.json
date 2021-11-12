@@ -83,7 +83,7 @@
           }
         },
         "responses": {
-          "200": {
+          "201": {
             "description": "Success",
             "content": {
               "application/json": {
@@ -133,6 +133,27 @@
     },
     "/api/v1/airports": {
       "description": "Create airports",
+      "get": {
+        "tags": [
+          "airports"
+        ],
+        "description": "Get airports",
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/airport"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
       "post": {
         "tags": [
           "airports"
@@ -167,13 +188,60 @@
           }
         }
       },
-      "get": {
+      "patch": {
         "tags": [
           "airports"
         ],
-        "description": "Get airports",
+        "description": "Update airports",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/airport"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "msg": {
+                      "type": "string",
+                      "description": "message",
+                      "example": "Succssfully updated"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/airports/{airport_id}": {
+      "delete": {
+        "tags": [
+          "airports"
+        ],
+        "description": "Delete airport",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "airport_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "airport id"
+          }
+        ],
+        "responses": {
+          "204": {
             "description": "Success",
             "content": {
               "application/json": {
@@ -191,40 +259,6 @@
     },
     "/api/v1/aircrafts": {
       "description": "Create aircrafts",
-      "post": {
-        "tags": [
-          "aircrafts"
-        ],
-        "description": "Create aircrafts",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/aircraft"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "msg": {
-                      "type": "string",
-                      "description": "message",
-                      "example": "Succssfully created"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
       "get": {
         "tags": [
           "aircrafts"
@@ -245,15 +279,172 @@
             }
           }
         }
+      },
+      "post": {
+        "tags": [
+          "aircrafts"
+        ],
+        "description": "Create aircrafts",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/aircraft"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "msg": {
+                      "type": "string",
+                      "description": "message",
+                      "example": "Succssfully created"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "aircrafts"
+        ],
+        "description": "Update aircrafts",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/aircraft"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "msg": {
+                      "type": "string",
+                      "description": "message",
+                      "example": "Succssfully updated"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/aircrafts/{aircraft_id}": {
+      "delete": {
+        "tags": [
+          "aircrafts"
+        ],
+        "description": "Get aircrafts",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "aircraft_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "aircraft id"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/aircraft"
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v1/transactions": {
       "description": "Create transactions",
+      "get": {
+        "tags": [
+          "transactions"
+        ],
+        "description": "Get transactions",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/transaction"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
       "post": {
         "tags": [
           "transactions"
         ],
         "description": "Create transactions",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/transaction"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "msg": {
+                      "type": "string",
+                      "description": "message",
+                      "example": "Succssfully created"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "transactions"
+        ],
+        "description": "Update transactions",
         "requestBody": {
           "content": {
             "application/json": {
@@ -274,7 +465,7 @@
                     "msg": {
                       "type": "string",
                       "description": "message",
-                      "example": "Succssfully created"
+                      "example": "Succssfully update"
                     }
                   }
                 }
@@ -282,14 +473,27 @@
             }
           }
         }
-      },
-      "get": {
+      }
+    },
+    "/api/v1/transactions/{transaction_id}": {
+      "delete": {
         "tags": [
           "transactions"
         ],
-        "description": "Get transactions",
+        "description": "Delete transactions",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "transaction_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "transaction id"
+          }
+        ],
         "responses": {
-          "200": {
+          "204": {
             "description": "Success",
             "content": {
               "application/json": {
