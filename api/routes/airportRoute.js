@@ -3,11 +3,13 @@ const airportRouter = Router()
 
 const { auth } = require("../../middlewares/auth")
 
-const { getAirport, createAirport, updateAirport, deleteAirport } = require("../controllers/airportController")
+const { getAirports, createAirport, updateAirport, deleteAirport, getAirportById, getTransactionsByAirport } = require("../controllers/airportController")
 
-airportRouter.route("/").get(auth, getAirport)
+airportRouter.route("/").get(auth, getAirports)
+airportRouter.route("/:airport_id").get(auth, getAirportById)
+airportRouter.route("/:airport_id/transactions").get(auth, getTransactionsByAirport)
 airportRouter.route("/").post(auth, createAirport)
-airportRouter.route("/").patch(auth, updateAirport)
+airportRouter.route("/:airport_id").patch(auth, updateAirport)
 airportRouter.route("/:airport_id").delete(auth, deleteAirport)
 
 

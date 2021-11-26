@@ -4,7 +4,7 @@ const jwtkey = process.env.JWT_KEY
 
 const auth = (req, res, next) => {
     try {
-        const token = req.headers.cookie.split('=')[1]
+        const token = req?.headers?.cookie?.split('=')[1]
         const payload = jwt.verify(token, jwtkey)
         const email = payload.email
         if (!email) {

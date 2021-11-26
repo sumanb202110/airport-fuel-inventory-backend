@@ -10,4 +10,4 @@ const transactionSchema = mongoose.Schema({
     transaction_id_parent: String
 })
 
-module.exports = mongoose.model('Transacion', transactionSchema)
+module.exports = mongoose.model('Transaction', transactionSchema)

@@ -3,18 +3,110 @@ const Airport = require("../../models/airport")
 
 
 
+
 // Read operation
-const getAirport = async (req, res, next) => {
+const getAirports = async (req, res, next) => {
+    const page = req.query.page || 1
+    const count = req.query.count || 100
     try {
-        const result = await Airport.find()
-        return res.status(200).json([...result.map((data) => {
+        const result = await Airport.aggregate(
+            [
+                {
+                  '$lookup': {
+                    'from': 'airports_transactions', 
+                    'localField': 'airport_id', 
+                    'foreignField': '_id', 
+                    'as': 'airport_transactions'
+                  }
+                }, {
+                  '$unwind': {
+                    'path': '$airport_transactions', 
+                    'preserveNullAndEmptyArrays': true
+                  }
+                }, {
+                  '$project': {
+                    '_id': 1, 
+                    'airport_id': '$airport_id', 
+                    'airport_name': '$airport_name', 
+                    'fuel_capacity': '$fuel_capacity', 
+                    'fuel_available': '$fuel_available', 
+                    'transactions': '$airport_transactions.transactions'
+                  }
+                }
+              ]
+        ).skip((parseInt(page) - 1) * parseInt(count)).limit(parseInt(count))
+        const resultCount = await Airport.find().count()
+        return res.status(200).json(
+            {
+            currentPage: page,
+            itemsPerPage: result.length,
+            totalPages: Math.ceil(resultCount/count),
+            totalItems: resultCount,
+            data:[...result.map((data) => {
+                return {
+                    airport_id: data.airport_id,
+                    airport_name: data.airport_name,
+                    fuel_capacity: data.fuel_capacity,
+                    fuel_available: data.fuel_available,
+                    transactions: data.transactions
+                }
+        })]})
+    } catch (err) {
+        console.log(err)
+        res.status(400).json({
+            msg: "Error"
+        }).send()
+    }
+}
+
+// Read operation
+const getTransactionsByAirport = async (req, res, next) => {
+    const page = req.query.page || 1
+    const count = req.query.count || 5
+
+    const airportId = req.params.airport_id
+    try {
+        const result = await Transaction.find({airport_id: airportId}).sort({transaction_date_time: -1}).skip((parseInt(page) - 1) * parseInt(count)).limit(parseInt(count))
+        const resultCount = await Transaction.find().count()
+        return res.status(200).json(
+            {
+            currentPage: page,
+            itemsPerPage: result.length,
+            totalPages: Math.ceil(resultCount/count),
+            totalItems: resultCount,
+            data: [...result.map((data) => {
             return {
+                transaction_id: data.transaction_id,
+                transaction_date_time: data.transaction_date_time,
+                transaction_type: data.transaction_type,
                 airport_id: data.airport_id,
-                airport_name: data.airport_name,
-                fuel_capacity: data.fuel_capacity,
-                fuel_available: data.fuel_available
+                aircraft_id: data.aircraft_id,
+                quantity: data.quantity,
+                transaction_id_parent: data.transaction_id_parent
             }
-        })])
+        })
+    ]
+    })
+    } catch (err) {
+        console.log(err)
+        res.status(400).json({
+            msg: "Error"
+        }).send()
+    }
+}
+
+// Read operation by id
+const getAirportById = async (req, res, next) => {
+    const airportId = req.params.airport_id
+    try {
+        const result = await Airport.findOne({airport_id: airportId})
+        return res.status(200).json(
+            {
+                airport_id: result.airport_id,
+                airport_name: result.airport_name,
+                fuel_capacity: result.fuel_capacity,
+                fuel_available: result.fuel_available
+            })
     } catch (err) {
         console.log(err)
         res.status(400).json({
@@ -117,7 +209,7 @@ const updateAirport = async (req, res, next) => {
             fuel_capacity: req.body.fuel_capacity,
             fuel_available: req.body.fuel_available
         })
-        const result = await Airport.findOneAndUpdate({ airport_id: req.body.airport_id },
+        const result = await Airport.findOneAndUpdate({ airport_id: req.params.airport_id },
             {
                 airport_name: req.body.airport_name,
                 fuel_capacity: req.body.fuel_capacity,
@@ -158,8 +250,10 @@ const deleteAirport = async (req, res, next) => {
 
 
 module.exports = {
-    getAirport,
+    getAirports,
     createAirport,
     updateAirport,
-    deleteAirport
+    deleteAirport,
+    getAirportById,
+    getTransactionsByAirport
 }

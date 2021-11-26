@@ -5,15 +5,97 @@ const Airport = require("../../models/airport")
 
 
 // Read operation
-const getTransaction = async (req, res, next) => {
-    const pagination = req.query.pagination
-    const page = req.query.page
-    const count = req.query.count
+const getTransactions = async (req, res, next) => {
+    const page = req.query.page || 1
+    const count = req.query.count || 100
+    let aggregateArr = [
+        {
+          '$set': {
+            'quantity': {
+              '$convert': {
+                'input': '$quantity', 
+                'to': 'int'
+              }
+            }
+          }
+        }
+      ]
+
+    if(req.query.airport_ids!== undefined){
+        aggregateArr.push(
+            {
+                '$match': {
+                    '$or': req.query.airport_ids?.split(",").map((data)=>{return{airport_id: data}})
+                }
+            }
+        ) 
+    }
+
+    if(req.query.aircraft_ids!== undefined){
+        aggregateArr.push(
+            {
+                '$match': {
+                    '$or': req.query.aircraft_ids?.split(",").map((data)=>{return{aircraft_id: data}})
+                }
+            }
+        ) 
+    }
+
+    if(req.query.transaction_types!== undefined){
+        aggregateArr.push(
+            {
+                '$match': {
+                    '$or': req.query.transaction_types?.split(",").map((data)=>{return{transaction_type: data}})
+                }
+            }
+        ) 
+    }
+    
+
+    
+    if(req.query.sort_by==="DATE_HIGH_LOW"){
+        aggregateArr.push({
+            '$sort': {
+                'transaction_date_time': -1
+            }
+          })
+    }else if(req.query.sort_by==="DATE_LOW_HIGH"){
+        aggregateArr.push({
+            '$sort': {
+                'transaction_date_time': 1
+            }
+          })
+    }else if(req.query.sort_by==="QUANTITY_LOW_HIGH"){
+        aggregateArr.push({
+            '$sort': {
+              'quantity': 1
+            }
+          })
+    }else if(req.query.sort_by==="QUANTITY_HIGH_LOW"){
+        aggregateArr.push({
+            '$sort': {
+              'quantity': -1
+            }
+          })
+    }else{
+        aggregateArr.push({
+            '$sort': {
+              'transaction_date_time': -1
+            }
+          })
+    }
     try {
-        const resultWithPage = await Transaction.find().skip((parseInt(page) - 1) * parseInt(count)).limit(parseInt(count))
-        const resultWithoutPage = await Transaction.find()
-        const result = pagination === "true" ? resultWithPage : resultWithoutPage
-        return res.status(200).json([...result.map((data) => {
+        const result = await Transaction.aggregate(
+            aggregateArr
+        ).skip((parseInt(page) - 1) * parseInt(count)).limit(parseInt(count))
+        const resultCount = await Transaction.find().count()
+        return res.status(200).json(
+            {
+            currentPage: page,
+            itemsPerPage: result.length,
+            totalPages: Math.ceil(resultCount/count),
+            totalItems: resultCount,
+            data: [...result.map((data) => {
             return {
                 transaction_id: data.transaction_id,
                 transaction_date_time: data.transaction_date_time,
@@ -23,7 +105,31 @@ const getTransaction = async (req, res, next) => {
                 quantity: data.quantity,
                 transaction_id_parent: data.transaction_id_parent
             }
-        })])
+        })
+    ]
+    })
+    } catch (err) {
+        console.log(err)
+        res.status(400).json({
+            msg: "Error"
+        }).send()
+    }
+}
+
+// Read operation by id
+const getTransactionById = async (req, res, next) => {
+    const transactionId = req.params.transaction_id
+    try {
+        const result = await Transaction.findOne({transaction_id: transactionId})
+        return res.status(200).json({
+                transaction_id: result.transaction_id,
+                transaction_date_time: result.transaction_date_time,
+                transaction_type: result.transaction_type,
+                airport_id: result.airport_id,
+                aircraft_id: result.aircraft_id,
+                quantity: result.quantity,
+                transaction_id_parent: result.transaction_id_parent
+        })
     } catch (err) {
         console.log(err)
         res.status(400).json({
@@ -188,7 +294,7 @@ const updateTransaction = async (req, res, next) => {
                         msg: "Fuel available can not be negative"
                     })
                 }
-                const transactionCreateResult = await Transaction.findOneAndUpdate({ transaction_id: req.body.transaction_id }, {
+                const transactionCreateResult = await Transaction.findOneAndUpdate({ transaction_id: req.params.transaction_id }, {
                     transaction_type: req.body.transaction_type,
                     airport_id: req.body.airport_id,
                     aircraft_id: req.body.aircraft_id,
@@ -249,8 +355,9 @@ const deleteTransaction = async (req, res, next) => {
 
 
 module.exports = {
-    getTransaction,
+    getTransactions,
     createTransaction,
     updateTransaction,
-    deleteTransaction
+    deleteTransaction,
+    getTransactionById
 }

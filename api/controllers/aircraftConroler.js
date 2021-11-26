@@ -4,16 +4,43 @@ const Aircraft = require("../../models/aircraft")
 
 
 // Read operation
-const getAircraft = async (req, res, next) => {
+const getAircrafts = async (req, res, next) => {
+    const page = req.query.page || 1
+    const count = req.query.count || 100
     try {
-        const result = await Aircraft.find()
-        return res.status(200).json([...result.map((data) => {
+        const result = await Aircraft.find().skip((parseInt(page) - 1) * parseInt(count)).limit(parseInt(count))
+        const resultCount = await Aircraft.find().count()
+        return res.status(200).json(
+            {
+            currentPage: page,
+            itemsPerPage: result.length,
+            totalPages: Math.ceil(resultCount/count),
+            totalItems: resultCount,
+            data: [...result.map((data) => {
             return {
                 aircraft_id: data.aircraft_id,
                 aircraft_no: data.aircraft_no,
                 airline: data.airline
             }
-        })])
+        })]})
+    } catch (err) {
+        console.log(err)
+        res.status(400).json({
+            msg: "Error"
+        })
+    }
+}
+
+// Read operation by id
+const getAircraftById = async (req, res, next) => {
+    const aircraftId = req.params.aircraft_id
+    try {
+        const result = await Aircraft.findOne({aircraft_id: aircraftId})
+        return res.status(200).json({
+                aircraft_id: result.aircraft_id,
+                aircraft_no: result.aircraft_no,
+                airline: result.airline
+            })
     } catch (err) {
         console.log(err)
         res.status(400).json({
@@ -131,8 +158,9 @@ const deleteAircraft = async (req, res, next) => {
 
 
 module.exports = {
-    getAircraft,
+    getAircrafts,
     createAircraft,
     updateAircraft,
-    deleteAircraft
+    deleteAircraft,
+    getAircraftById
 }
