@@ -2,11 +2,14 @@ const mongoose = require("mongoose")
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
 const User = require("../../models/user")
+const Token = require("../../models/token")
 
-const jwtkey = process.env.JWT_KEY
-const jwtexpirySecond = 3600 * 24
 
-// Read operation
+const jwtKey = process.env.JWT_KEY
+const jwtRefreshKey = process.env.JWT_REFRESH_KEY
+const jwtexpirySecond = 60 * 120
+
+// Login operation
 const login = async (req, res, next) => {
     try {
         const result = await User.find({ email: req.body.email })
@@ -17,22 +20,35 @@ const login = async (req, res, next) => {
 
         if (result) {
             bcrypt.compare(req.body.password, result[0].password).then(
-                (valid) => {
+                async (valid) => {
                     if (!valid) {
                         return res.status(401).json({ msg: "Incorrect password" }).send()
                     }
 
                     // Generate jwt token
-                    const token = jwt.sign({ email: result[0].email }, jwtkey, {
+                    const token = jwt.sign({ email: result[0].email }, jwtKey, {
                         algorithm: "HS256",
                         expiresIn: jwtexpirySecond
                     })
+
+                    // Generate refres jwt token
+                    const refreshToken = jwt.sign({ email: result[0].email }, jwtRefreshKey, {
+                        algorithm: "HS256",
+                        expiresIn: jwtexpirySecond
+                    })
+
+                    const refreshTokenDbObj = new Token({
+                        token: refreshToken
+                    })
+
+                    const refreshTokenSaveRes = await refreshTokenDbObj.save()
+
                     // Set token to cookie
-                    res.cookie("token", token, { maxAge: jwtexpirySecond * 1000 })
+                    // res.cookie("token", token, { maxAge: jwtexpirySecond * 1000 })
 
                     res.status(200).json({
-                        email: result[0].email,
-                        msg: "Successfully logedin"
+                        token: token,
+                        refreshToken: refreshToken
                     }).send()
                 }
             )
@@ -45,10 +61,46 @@ const login = async (req, res, next) => {
     }
 }
 
+// Refresh operation
+const refresh = async (req, res, next) => {
+    try{
+        // Generate jwt token
+        const token = jwt.sign({ email: req.userEmail }, jwtKey, {
+            algorithm: "HS256",
+            expiresIn: jwtexpirySecond
+        })
+
+        // Generate refres jwt token
+        const refreshToken = jwt.sign({ email: req.userEmail }, jwtRefreshKey, {
+            algorithm: "HS256",
+            expiresIn: jwtexpirySecond
+        })
+
+       
+
+        const refreshTokenSaveRes = await Token.findOneAndUpdate({ token: req.body.refreshToken },{token: refreshToken})
+
+        // Set token to cookie
+        // res.cookie("token", token, { maxAge: jwtexpirySecond * 1000 })
+
+        res.status(200).json({
+            token: token,
+            refreshToken: refreshToken
+        }).send()
+             
+    } catch (err) {
+        console.log(err)
+        res.status(400).json({
+            msg: "Error"
+        }).send()
+    }
+}
+
 
 // Logout
-const logout = (req, res, next) => {
-    res.cookie("token", "", { maxAge: -100000 })
+const logout = async(req, res, next) => {
+    // res.cookie("token", "", { maxAge: -100000 })
+    const tokenDeleteRes = await Token.deleteOne({token: req.body.refreshToken})
     res.status(200).json({
         msg: "Logout"
     }).send()
@@ -87,5 +139,6 @@ const createUser = async (req, res, next) => {
 module.exports = {
     login,
     logout,
-    createUser
+    createUser,
+    refresh
 }

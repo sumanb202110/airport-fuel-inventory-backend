@@ -4,15 +4,15 @@ const jwtkey = process.env.JWT_KEY
 
 const auth = (req, res, next) => {
     try {
-        const token = req?.headers?.cookie?.split('=')[1]
-        const payload = jwt.verify(token, jwtkey)
-        const email = payload.email
-        if (!email) {
-            return res.status(401).json({
-                msg: "unauthorized access"
-            }).send()
-        }
-        next()
+        const authHeader = req?.headers['authorization']
+        const token = authHeader && authHeader.split(' ')[1]
+        if(token == null) return res.status(401).send()
+
+        jwt.verify(token, jwtkey, (err, email) => {
+            if(err) return res.status(403).send()
+            req.userEmail = email
+            next()
+        })
     } catch (e) {
         console.log(e)
         return res.status(401).json({

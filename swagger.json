@@ -32,6 +32,7 @@
     "/api/v1/users/login": {
       "description": "login",
       "post": {
+        "summary": "login",
         "tags": [
           "users"
         ],
@@ -53,10 +54,30 @@
                 "schema": {
                   "type": "object",
                   "properties": {
+                    "token": {
+                      "type": "string",
+                      "description": "message",
+                      "example": "token"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
                     "msg": {
                       "type": "string",
                       "description": "message",
-                      "example": "Succssfully login"
+                      "example": "message"
                     }
                   }
                 }
@@ -69,6 +90,7 @@
     "/api/v1/users": {
       "description": "Create user",
       "post": {
+        "summary": "create user",
         "tags": [
           "users"
         ],
@@ -99,6 +121,12 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized Error"
           }
         }
       }
@@ -106,6 +134,15 @@
     "/api/v1/users/logout": {
       "description": "Logout",
       "post": {
+        "security": [
+          {
+            "BearerAuth": [
+              "read",
+              "write"
+            ]
+          }
+        ],
+        "summary": "logout",
         "tags": [
           "users"
         ],
@@ -127,34 +164,103 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized Error"
           }
         }
       }
     },
     "/api/v1/airports": {
-      "description": "Create airports",
+      "description": "airports",
       "get": {
+        "security": [
+          {
+            "BearerAuth": [
+              "read",
+              "write"
+            ]
+          }
+        ],
+        "summary": "get airports",
         "tags": [
           "airports"
         ],
         "description": "Get airports",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Page number"
+          },
+          {
+            "in": "query",
+            "name": "count",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Items per page"
+          }
+        ],
         "responses": {
-          "201": {
+          "200": {
             "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/airport"
+                  "type": "object",
+                  "properties": {
+                    "currentPage": {
+                      "type": "number",
+                      "example": 10
+                    },
+                    "itemsPerPage": {
+                      "type": "number",
+                      "example": 10
+                    },
+                    "totalPages": {
+                      "type": "number",
+                      "example": 100
+                    },
+                    "totalItems": {
+                      "type": "number",
+                      "example": 1000
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/airportWithTransaction"
+                      }
+                    }
                   }
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized Error"
           }
         }
       },
       "post": {
+        "security": [
+          {
+            "BearerAuth": [
+              "read",
+              "write"
+            ]
+          }
+        ],
+        "summary": "create airport",
         "tags": [
           "airports"
         ],
@@ -169,28 +275,29 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "msg": {
-                      "type": "string",
-                      "description": "message",
-                      "example": "Succssfully created"
-                    }
-                  }
-                }
-              }
-            }
+          "201": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized Error"
           }
         }
       }
     },
     "/api/v1/airports/{airport_id}": {
       "get": {
+        "security": [
+          {
+            "BearerAuth": [
+              "read",
+              "write"
+            ]
+          }
+        ],
+        "summary": "get aircraft by id",
         "tags": [
           "airports"
         ],
@@ -207,7 +314,7 @@
           }
         ],
         "responses": {
-          "201": {
+          "200": {
             "description": "Success",
             "content": {
               "application/json": {
@@ -216,10 +323,25 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized Error"
           }
         }
       },
       "patch": {
+        "security": [
+          {
+            "BearerAuth": [
+              "read",
+              "write"
+            ]
+          }
+        ],
+        "summary": "update airport details",
         "tags": [
           "airports"
         ],
@@ -261,10 +383,25 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized Error"
           }
         }
       },
       "delete": {
+        "security": [
+          {
+            "BearerAuth": [
+              "read",
+              "write"
+            ]
+          }
+        ],
+        "summary": "delete airport",
         "tags": [
           "airports"
         ],
@@ -293,34 +430,103 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized Error"
           }
         }
       }
     },
     "/api/v1/aircrafts": {
-      "description": "Create aircrafts",
+      "description": "get aircrafts",
       "get": {
+        "security": [
+          {
+            "BearerAuth": [
+              "read",
+              "write"
+            ]
+          }
+        ],
+        "summary": "get airports",
         "tags": [
           "aircrafts"
         ],
         "description": "Get aircrafts",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Page number"
+          },
+          {
+            "in": "query",
+            "name": "count",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Items per page"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/aircraft"
+                  "type": "object",
+                  "properties": {
+                    "currentPage": {
+                      "type": "number",
+                      "example": 10
+                    },
+                    "itemsPerPage": {
+                      "type": "number",
+                      "example": 10
+                    },
+                    "totalPages": {
+                      "type": "number",
+                      "example": 100
+                    },
+                    "totalItems": {
+                      "type": "number",
+                      "example": 1000
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/aircraft"
+                      }
+                    }
                   }
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized Error"
           }
         }
       },
       "post": {
+        "security": [
+          {
+            "BearerAuth": [
+              "read",
+              "write"
+            ]
+          }
+        ],
+        "summary": "create aircraft",
         "tags": [
           "aircrafts"
         ],
@@ -351,12 +557,27 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized Error"
           }
         }
       }
     },
     "/api/v1/aircrafts/{aircraft_id}": {
       "get": {
+        "security": [
+          {
+            "BearerAuth": [
+              "read",
+              "write"
+            ]
+          }
+        ],
+        "summary": "get aircrafts by id",
         "tags": [
           "aircrafts"
         ],
@@ -382,10 +603,25 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized Error"
           }
         }
       },
       "patch": {
+        "security": [
+          {
+            "BearerAuth": [
+              "read",
+              "write"
+            ]
+          }
+        ],
+        "summary": "update aircraft",
         "tags": [
           "aircrafts"
         ],
@@ -427,10 +663,25 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized Error"
           }
         }
       },
       "delete": {
+        "security": [
+          {
+            "BearerAuth": [
+              "read",
+              "write"
+            ]
+          }
+        ],
+        "summary": "delete aircraft",
         "tags": [
           "aircrafts"
         ],
@@ -459,34 +710,153 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized Error"
           }
         }
       }
     },
     "/api/v1/transactions": {
-      "description": "Create transactions",
+      "description": "Transactions",
       "get": {
+        "security": [
+          {
+            "BearerAuth": [
+              "read",
+              "write"
+            ]
+          }
+        ],
+        "summary": "get transcations",
         "tags": [
           "transactions"
         ],
         "description": "Get transactions",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Page number"
+          },
+          {
+            "in": "query",
+            "name": "count",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Items per page"
+          },
+          {
+            "in": "query",
+            "name": "airport_ids",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "example": "IN106"
+              }
+            },
+            "description": "sort by airport ids"
+          },
+          {
+            "in": "query",
+            "name": "aircraft_ids",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "example": 1001
+              }
+            },
+            "description": "Sort by aircraft ids"
+          },
+          {
+            "in": "query",
+            "name": "transaction_types",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "in",
+                "out"
+              ]
+            },
+            "description": "Filter by transaction type"
+          },
+          {
+            "in": "query",
+            "name": "sort_by",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "DATE_HIGH_LOW",
+                "DATE_LOW_HIGH",
+                "QUANTITY_LOW_HIGH",
+                "QUANTITY_HIGH_LOW"
+              ]
+            },
+            "description": "Sorting type"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/transaction"
+                  "type": "object",
+                  "properties": {
+                    "currentPage": {
+                      "type": "number",
+                      "example": 10
+                    },
+                    "itemsPerPage": {
+                      "type": "number",
+                      "example": 10
+                    },
+                    "totalPages": {
+                      "type": "number",
+                      "example": 100
+                    },
+                    "totalItems": {
+                      "type": "number",
+                      "example": 1000
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/transaction"
+                      }
+                    }
                   }
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized Error"
           }
         }
       },
       "post": {
+        "security": [
+          {
+            "BearerAuth": [
+              "read",
+              "write"
+            ]
+          }
+        ],
+        "summary": "create transaction",
         "tags": [
           "transactions"
         ],
@@ -517,12 +887,27 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized Error"
           }
         }
       }
     },
     "/api/v1/transactions/{transaction_id}": {
       "get": {
+        "security": [
+          {
+            "BearerAuth": [
+              "read",
+              "write"
+            ]
+          }
+        ],
+        "summary": "get transactions by id",
         "tags": [
           "transactions"
         ],
@@ -548,10 +933,25 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized Error"
           }
         }
       },
       "patch": {
+        "security": [
+          {
+            "BearerAuth": [
+              "read",
+              "write"
+            ]
+          }
+        ],
+        "summary": "update transaction",
         "tags": [
           "transactions"
         ],
@@ -593,10 +993,25 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized Error"
           }
         }
       },
       "delete": {
+        "security": [
+          {
+            "BearerAuth": [
+              "read",
+              "write"
+            ]
+          }
+        ],
+        "summary": "delete transaction",
         "tags": [
           "transactions"
         ],
@@ -625,12 +1040,24 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized Error"
           }
         }
       }
     }
   },
   "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    },
     "schemas": {
       "user": {
         "type": "object",
@@ -663,6 +1090,33 @@
           "fuel_available": {
             "type": "number",
             "example": 2000
+          }
+        }
+      },
+      "airportWithTransaction": {
+        "type": "object",
+        "properties": {
+          "airport_id": {
+            "type": "string",
+            "example": "test airport id"
+          },
+          "airport_name": {
+            "type": "string",
+            "example": "test airport name"
+          },
+          "fuel_capacity": {
+            "type": "number",
+            "example": 5000
+          },
+          "fuel_available": {
+            "type": "number",
+            "example": 2000
+          },
+          "transactions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/transaction"
+            }
           }
         }
       },
