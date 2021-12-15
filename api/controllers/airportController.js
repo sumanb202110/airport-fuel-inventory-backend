@@ -153,11 +153,14 @@ const createAirport = async (req, res, next) => {
             fuel_capacity: req.body.fuel_capacity,
             fuel_available: req.body.fuel_available
         })
-        const result = await airport.save()
+        const createAirportResult = await airport.save()
 
-        console.log(result)
         res.status(201).json({
-            msg: "Airport successfully created"
+                    airport_id: createAirportResult.airport_id,
+                    airport_name: createAirportResult.airport_name,
+                    fuel_capacity: createAirportResult.fuel_capacity,
+                    fuel_available: createAirportResult.fuel_available,
+                    transactions: createAirportResult.transactions
         })
 
     } catch (err) {
@@ -248,6 +251,111 @@ const deleteAirport = async (req, res, next) => {
     }
 }
 
+// Airport report
+const getAirportsReport = async (req, res, next) => {
+    try {
+        const resultAirportLTE20 = await Airport.aggregate(
+            [
+                {
+                  '$project': {
+                    'airport_id': 1, 
+                    'airport_name': 1, 
+                    'fuel_capacity': 1, 
+                    'fuel_available': 1, 
+                    'available_percentage': {
+                      '$round': [
+                        {
+                          '$multiply': [
+                            {
+                              '$divide': [
+                                '$fuel_available', '$fuel_capacity'
+                              ]
+                            }, 100
+                          ]
+                        }, 2
+                      ]
+                    }
+                  }
+                }, {
+                  '$sort': {
+                    'available_percentage': 1
+                  }
+                }, {
+                  '$match': {
+                    'available_percentage': {
+                      '$lte': 20
+                    }
+                  }
+                }
+              ]
+        )
+        const resultAirportGTE80 = await Airport.aggregate(
+        [
+            {
+                '$project': {
+                'airport_id': 1, 
+                'airport_name': 1, 
+                'fuel_capacity': 1, 
+                'fuel_available': 1, 
+                'available_percentage': {
+                    '$round': [
+                    {
+                        '$multiply': [
+                        {
+                            '$divide': [
+                            '$fuel_available', '$fuel_capacity'
+                            ]
+                        }, 100
+                        ]
+                    }, 2
+                    ]
+                }
+                }
+            }, {
+                '$sort': {
+                'available_percentage': 1
+                }
+            }, {
+                '$match': {
+                'available_percentage': {
+                    '$gte': 80
+                }
+                }
+            }
+            ]
+        )
+        return res.status(200).json(
+            {
+            
+                airportLTE20:[...resultAirportLTE20.map((data) => {
+                return {
+                    airport_id: data.airport_id,
+                    airport_name: data.airport_name,
+                    fuel_capacity: data.fuel_capacity,
+                    fuel_available: data.fuel_available,
+                    available_percentage: data.available_percentage,
+
+                }
+                })],
+                airportGTE80:[...resultAirportGTE80.map((data) => {
+                    return {
+                        airport_id: data.airport_id,
+                        airport_name: data.airport_name,
+                        fuel_capacity: data.fuel_capacity,
+                        fuel_available: data.fuel_available,
+                        available_percentage: data.available_percentage,
+
+                    }
+                })]
+    })
+    } catch (err) {
+        console.log(err)
+        res.status(400).json({
+            msg: "Error"
+        }).send()
+    }
+}
+
 
 module.exports = {
     getAirports,
@@ -255,5 +363,6 @@ module.exports = {
     updateAirport,
     deleteAirport,
     getAirportById,
-    getTransactionsByAirport
+    getTransactionsByAirport,
+    getAirportsReport
 }

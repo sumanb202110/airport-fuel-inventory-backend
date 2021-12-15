@@ -10,79 +10,79 @@ const getTransactions = async (req, res, next) => {
     const count = req.query.count || 100
     let aggregateArr = [
         {
-          '$set': {
-            'quantity': {
-              '$convert': {
-                'input': '$quantity', 
-                'to': 'int'
-              }
+            '$set': {
+                'quantity': {
+                    '$convert': {
+                        'input': '$quantity',
+                        'to': 'int'
+                    }
+                }
             }
-          }
         }
-      ]
+    ]
 
-    if(req.query.airport_ids!== undefined){
+    if (req.query.airport_ids !== undefined) {
         aggregateArr.push(
             {
                 '$match': {
-                    '$or': req.query.airport_ids?.split(",").map((data)=>{return{airport_id: data}})
+                    '$or': req.query.airport_ids?.split(",").map((data) => { return { airport_id: data } })
                 }
             }
-        ) 
+        )
     }
 
-    if(req.query.aircraft_ids!== undefined){
+    if (req.query.aircraft_ids !== undefined) {
         aggregateArr.push(
             {
                 '$match': {
-                    '$or': req.query.aircraft_ids?.split(",").map((data)=>{return{aircraft_id: data}})
+                    '$or': req.query.aircraft_ids?.split(",").map((data) => { return { aircraft_id: data } })
                 }
             }
-        ) 
+        )
     }
 
-    if(req.query.transaction_types!== undefined){
+    if (req.query.transaction_types !== undefined) {
         aggregateArr.push(
             {
                 '$match': {
-                    '$or': req.query.transaction_types?.split(",").map((data)=>{return{transaction_type: data}})
+                    '$or': req.query.transaction_types?.split(",").map((data) => { return { transaction_type: data } })
                 }
             }
-        ) 
+        )
     }
-    
 
-    
-    if(req.query.sort_by==="DATE_HIGH_LOW"){
+
+
+    if (req.query.sort_by === "DATE_HIGH_LOW") {
         aggregateArr.push({
             '$sort': {
                 'transaction_date_time': -1
             }
-          })
-    }else if(req.query.sort_by==="DATE_LOW_HIGH"){
+        })
+    } else if (req.query.sort_by === "DATE_LOW_HIGH") {
         aggregateArr.push({
             '$sort': {
                 'transaction_date_time': 1
             }
-          })
-    }else if(req.query.sort_by==="QUANTITY_LOW_HIGH"){
+        })
+    } else if (req.query.sort_by === "QUANTITY_LOW_HIGH") {
         aggregateArr.push({
             '$sort': {
-              'quantity': 1
+                'quantity': 1
             }
-          })
-    }else if(req.query.sort_by==="QUANTITY_HIGH_LOW"){
+        })
+    } else if (req.query.sort_by === "QUANTITY_HIGH_LOW") {
         aggregateArr.push({
             '$sort': {
-              'quantity': -1
+                'quantity': -1
             }
-          })
-    }else{
+        })
+    } else {
         aggregateArr.push({
             '$sort': {
-              'transaction_date_time': -1
+                'transaction_date_time': -1
             }
-          })
+        })
     }
     try {
         const result = await Transaction.aggregate(
@@ -91,23 +91,23 @@ const getTransactions = async (req, res, next) => {
         const resultCount = await Transaction.find().count()
         return res.status(200).json(
             {
-            currentPage: page,
-            itemsPerPage: result.length,
-            totalPages: Math.ceil(resultCount/count),
-            totalItems: resultCount,
-            data: [...result.map((data) => {
-            return {
-                transaction_id: data.transaction_id,
-                transaction_date_time: data.transaction_date_time,
-                transaction_type: data.transaction_type,
-                airport_id: data.airport_id,
-                aircraft_id: data.aircraft_id,
-                quantity: data.quantity,
-                transaction_id_parent: data.transaction_id_parent
-            }
-        })
-    ]
-    })
+                currentPage: page,
+                itemsPerPage: result.length,
+                totalPages: Math.ceil(resultCount / count),
+                totalItems: resultCount,
+                data: [...result.map((data) => {
+                    return {
+                        transaction_id: data.transaction_id,
+                        transaction_date_time: data.transaction_date_time,
+                        transaction_type: data.transaction_type,
+                        airport_id: data.airport_id,
+                        aircraft_id: data.aircraft_id,
+                        quantity: data.quantity,
+                        transaction_id_parent: data.transaction_id_parent
+                    }
+                })
+                ]
+            })
     } catch (err) {
         console.log(err)
         res.status(400).json({
@@ -120,15 +120,15 @@ const getTransactions = async (req, res, next) => {
 const getTransactionById = async (req, res, next) => {
     const transactionId = req.params.transaction_id
     try {
-        const result = await Transaction.findOne({transaction_id: transactionId})
+        const result = await Transaction.findOne({ transaction_id: transactionId })
         return res.status(200).json({
-                transaction_id: result.transaction_id,
-                transaction_date_time: result.transaction_date_time,
-                transaction_type: result.transaction_type,
-                airport_id: result.airport_id,
-                aircraft_id: result.aircraft_id,
-                quantity: result.quantity,
-                transaction_id_parent: result.transaction_id_parent
+            transaction_id: result.transaction_id,
+            transaction_date_time: result.transaction_date_time,
+            transaction_type: result.transaction_type,
+            airport_id: result.airport_id,
+            aircraft_id: result.aircraft_id,
+            quantity: result.quantity,
+            transaction_id_parent: result.transaction_id_parent
         })
     } catch (err) {
         console.log(err)
@@ -208,7 +208,13 @@ const createTransaction = async (req, res, next) => {
                 session.endSession();
 
                 res.status(201).json({
-                    msg: "New transaction successfully created"
+                    transaction_id: transactionCreateResult.transaction_id,
+                    transaction_date_time: transactionCreateResult.transaction_date_time,
+                    transaction_type: transactionCreateResult.transaction_type,
+                    airport_id: transactionCreateResult.airport_id,
+                    aircraft_id: transactionCreateResult.aircraft_id,
+                    quantity: transactionCreateResult.quantity,
+                    transaction_id_parent: transactionCreateResult?.transaction_id_parent
                 })
             } catch (error) {
                 // If an error occurred, abort the whole transaction and
@@ -341,9 +347,9 @@ const updateTransaction = async (req, res, next) => {
 
 // Delete operation
 const deleteTransaction = async (req, res, next) => {
-    
+
     try {
-        const result = await Transaction.deleteOne({transaction_id: req.params.transaction_id})
+        const result = await Transaction.deleteOne({ transaction_id: req.params.transaction_id })
         return res.status(204).send()
     } catch (err) {
         console.log(err)
@@ -353,11 +359,111 @@ const deleteTransaction = async (req, res, next) => {
     }
 }
 
+// Transaction report
+const getTransactionsReport = async (req, res, next) => {
+
+    try {
+        const result = await Transaction.aggregate(
+            [
+                {
+                  '$group': {
+                    '_id': {
+                      'month': {
+                        '$month': '$transaction_date_time'
+                      }, 
+                      'year': {
+                        '$year': '$transaction_date_time'
+                      }, 
+                      'transaction_type': '$transaction_type'
+                    }, 
+                    'total': {
+                      '$sum': '$quantity'
+                    }
+                  }
+                }, {
+                  '$project': {
+                    '_id': 0, 
+                    'month': '$_id.month', 
+                    'year': '$_id.year', 
+                    'transaction_type': '$_id.transaction_type', 
+                    'total_quantity': '$total'
+                  }
+                }, {
+                  '$sort': {
+                    'year': 1, 
+                    'month': 1
+                  }
+                }
+              ]
+        )
+
+        const todayTransactions = await Transaction.aggregate(
+            [{'$project': {
+                "year": {
+                    "$year": "$transaction_date_time"
+                  },
+                  "month": {
+                    "$month": "$transaction_date_time"
+                  },
+                  "day": {
+                    "$dayOfMonth": "$transaction_date_time"
+                  },
+                  'transaction_id':1,
+                  'transaction_type':1,
+                  'airport_id':1,
+                  'aircraft_id':1,
+                  'quantity':1,
+                  'transaction_id_parent':1,
+                  'transaction_date_time':1
+              }
+              }, {'$match':  {
+                  "year": new Date().getFullYear(),
+                  "month": new Date().getMonth()+1, 
+                  "day": new Date().getDate()
+                }}, {$project: {
+                'year': 0,
+                'month': 0,
+                'day': 0
+              }}]
+        )
+        return res.status(200).json(
+            {
+                yearMonthReport: [...result.map((data) => {
+                    return {
+                        month: data.month,
+                        year: data.year,
+                        transaction_type: data.transaction_type,
+                        totalQuantity: data.total_quantity
+                    }
+                })
+                ],
+                todayTransactions: [
+                    ...todayTransactions.map((transaction)=>{
+                        return{
+                            transaction_id: transaction.transaction_id,
+                            transaction_date_time: transaction.transaction_date_time,
+                            transaction_type: transaction.transaction_type,
+                            airport_id: transaction.airport_id,
+                            aircraft_id: transaction.aircraft_id,
+                            quantity: transaction.quantity,
+                            transaction_id_parent: transaction.transaction_id_parent
+                        }
+                    })
+                ]
+            })
+    } catch (err) {
+        console.log(err)
+        res.status(400).json({
+            msg: "Error"
+        }).send()
+    }
+}
 
 module.exports = {
     getTransactions,
     createTransaction,
     updateTransaction,
     deleteTransaction,
-    getTransactionById
+    getTransactionById,
+    getTransactionsReport
 }

@@ -58,6 +58,11 @@
                       "type": "string",
                       "description": "message",
                       "example": "token"
+                    },
+                    "refreshToken": {
+                      "type": "string",
+                      "description": "message",
+                      "example": "refresh token"
                     }
                   }
                 }
@@ -83,6 +88,82 @@
                 }
               }
             }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/users/refresh": {
+      "description": "refresh token",
+      "post": {
+        "summary": "refresh token",
+        "tags": [
+          "users"
+        ],
+        "description": "refresh token",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "refreshToken": {
+                    "type": "string",
+                    "description": "message",
+                    "example": "refresh token"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string",
+                      "description": "message",
+                      "example": "token"
+                    },
+                    "refreshToken": {
+                      "type": "string",
+                      "description": "message",
+                      "example": "refresh token"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "msg": {
+                      "type": "string",
+                      "description": "message",
+                      "example": "message"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
@@ -127,6 +208,9 @@
           },
           "401": {
             "description": "Unauthorized Error"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
@@ -170,6 +254,9 @@
           },
           "401": {
             "description": "Unauthorized Error"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
@@ -248,6 +335,9 @@
           },
           "401": {
             "description": "Unauthorized Error"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       },
@@ -283,6 +373,9 @@
           },
           "401": {
             "description": "Unauthorized Error"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
@@ -329,6 +422,9 @@
           },
           "401": {
             "description": "Unauthorized Error"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       },
@@ -389,6 +485,9 @@
           },
           "401": {
             "description": "Unauthorized Error"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       },
@@ -436,6 +535,9 @@
           },
           "401": {
             "description": "Unauthorized Error"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
@@ -514,6 +616,9 @@
           },
           "401": {
             "description": "Unauthorized Error"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       },
@@ -563,6 +668,9 @@
           },
           "401": {
             "description": "Unauthorized Error"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
@@ -609,6 +717,9 @@
           },
           "401": {
             "description": "Unauthorized Error"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       },
@@ -669,6 +780,9 @@
           },
           "401": {
             "description": "Unauthorized Error"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       },
@@ -716,6 +830,9 @@
           },
           "401": {
             "description": "Unauthorized Error"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
@@ -844,6 +961,9 @@
           },
           "401": {
             "description": "Unauthorized Error"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       },
@@ -893,6 +1013,9 @@
           },
           "401": {
             "description": "Unauthorized Error"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
@@ -939,6 +1062,9 @@
           },
           "401": {
             "description": "Unauthorized Error"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       },
@@ -999,6 +1125,9 @@
           },
           "401": {
             "description": "Unauthorized Error"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       },
@@ -1046,6 +1175,9 @@
           },
           "401": {
             "description": "Unauthorized Error"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }

@@ -77,11 +77,12 @@ const createAircraft = async (req, res, next) => {
             aircraft_no: req.body.aircraft_no,
             airline: req.body.airline
         })
-        const result = await aircraft.save()
+        const createAircraftResult = await aircraft.save()
 
-        console.log(result)
         res.status(201).json({
-            msg: "Aircraft successfully created"
+            aircraft_id: createAircraftResult.aircraft_id,
+            aircraft_no: createAircraftResult.aircraft_no,
+            airline: createAircraftResult.airline
         })
 
     } catch (err) {
