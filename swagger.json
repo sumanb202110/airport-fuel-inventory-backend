@@ -380,6 +380,90 @@
         }
       }
     },
+    "/api/v1/airports/report": {
+      "description": "airports report",
+      "get": {
+        "security": [
+          {
+            "BearerAuth": [
+              "read",
+              "write"
+            ]
+          }
+        ],
+        "summary": "get airports report",
+        "tags": [
+          "airports"
+        ],
+        "description": "Get airports report",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "mostRecent10TransactedAirports": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "example": "example airpot id"
+                      }
+                    },
+                    "mostRecent100Transactions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/transaction"
+                      }
+                    },
+                    "todayTransactions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/transaction"
+                      }
+                    },
+                    "yearMonthReport": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "month": {
+                            "type": "number",
+                            "example": 10
+                          },
+                          "year": {
+                            "type": "number",
+                            "example": 2021
+                          },
+                          "transaction_type": {
+                            "type": "string",
+                            "example": "IN"
+                          },
+                          "totalQuantity": {
+                            "type": "number",
+                            "example": 12000
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized Error"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/api/v1/airports/{airport_id}": {
       "get": {
         "security": [
@@ -1002,6 +1086,59 @@
                       "type": "string",
                       "description": "message",
                       "example": "Succssfully created"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized Error"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/transactions/report": {
+      "description": "Transactions",
+      "get": {
+        "security": [
+          {
+            "BearerAuth": [
+              "read",
+              "write"
+            ]
+          }
+        ],
+        "summary": "Get transactions report",
+        "tags": [
+          "transactions"
+        ],
+        "description": "Get transactions report",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "airportGTE80": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/airport"
+                      }
+                    },
+                    "airportLTE20": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/airport"
+                      }
                     }
                   }
                 }

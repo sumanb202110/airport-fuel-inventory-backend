@@ -426,6 +426,18 @@ const getTransactionsReport = async (req, res, next) => {
                 'day': 0
               }}]
         )
+
+        const mostRecent100Transactions = await Transaction.aggregate(
+            [
+                {
+                  '$sort': {
+                    'transaction_date_time': -1
+                  }
+                }, {
+                  '$limit': 100
+                }
+              ]
+        )
         return res.status(200).json(
             {
                 yearMonthReport: [...result.map((data) => {
@@ -449,7 +461,26 @@ const getTransactionsReport = async (req, res, next) => {
                             transaction_id_parent: transaction.transaction_id_parent
                         }
                     })
+                ],
+                mostRecent100Transactions:  [
+                    ...mostRecent100Transactions.map((transaction)=>{
+                        return {
+                            transaction_id: transaction.transaction_id,
+                            transaction_date_time: transaction.transaction_date_time,
+                            transaction_type: transaction.transaction_type,
+                            airport_id: transaction.airport_id,
+                            aircraft_id: transaction.aircraft_id,
+                            quantity: transaction.quantity,
+                            transaction_id_parent: transaction.transaction_id_parent
+                        }
+                    })
+                ],
+                mostRecent10TransactedAirports: [
+                    ...mostRecent100Transactions.map((transaction)=>{
+                        return transaction.airport_id
+                    }).filter((value, index, array)=>array.indexOf(value)=== index).slice(0,10)
                 ]
+
             })
     } catch (err) {
         console.log(err)
