@@ -10,7 +10,6 @@ const port = process.env.PORT || 4000
 
 app.use(function (req, res, next) {
     res.setHeader('Access-Control-Allow-Origin', '*');
-    // res.setHeader('Access-Control-Allow-Credentials', true);
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
     res.setHeader('Access-Control-Allow-Headers', 'content-type, Authorization');
     next()
@@ -28,11 +27,6 @@ const { userRouter } = require("./api/routes/userRoute")
 mongoose.connect(
     process.env.MONGODB_URL
 )
-
-app.get('/', (req, res) => {
-    res.send("app start")
-})
-
 app.use("/api/v1/airports", airportRouter)
 app.use("/api/v1/aircrafts", aircraftRouter)
 app.use("/api/v1/transactions", transactionRouter)
