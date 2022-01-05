@@ -108,6 +108,28 @@ const logout = async(req, res, next) => {
 
 // Create operation
 const createUser = async (req, res, next) => {
+    // Email validation function
+    const validateEmail = (email) => {
+        const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(email);
+    }
+
+     // Password check
+     const validatePassword = (password) => {
+        const re = /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&-+=()])(?=\\S+$).{8, 20}$/
+        return re.test(password);
+    }
+    if(!validateEmail(req.body.email)){
+        res.status(400).json({
+            msg: "Invalid email"
+        }).send()
+    }
+    if(!validatePassword(req.body.password)){
+        res.status(400).json({
+            msg: `Password must be of length 8 to 30 which contains one digit, one uppercase alphabet, one lower case alphabet,
+            one special character which includes !@#$%&*()-+=^ and does not contain any white space`
+        }).send()
+    }
     try {
         await bcrypt.hash(req.body.password, 10).then(
             async (hash) => {
