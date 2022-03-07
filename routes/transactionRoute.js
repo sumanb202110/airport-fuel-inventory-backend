@@ -1,7 +1,7 @@
 const { Router } = require("express")
 const transactionRouter = Router()
 
-const { auth } = require("../../middlewares/auth")
+const { auth } = require("../middlewares/auth")
 const { createTransaction, getTransactions, updateTransaction, deleteTransaction, getTransactionById, getTransactionsReport } = require("../controllers/transactionController")
 
 transactionRouter.route("/").get(auth, getTransactions)

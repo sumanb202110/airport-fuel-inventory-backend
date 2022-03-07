@@ -1,6 +1,6 @@
 const mongoose = require("mongoose")
-const Transaction = require("../../models/transaction")
-const Airport = require("../../models/airport")
+const Transaction = require("../models/transaction")
+const Airport = require("../models/airport")
 
 
 
@@ -246,7 +246,28 @@ const createTransaction = async (req, res, next) => {
 
 }
 
+const checkCondition = async (airportUpdateResult, session, res) => {
+    let msg = "";
+    let condition = false;
+    if(parseInt(airportUpdateResult.fuel_available) > airportUpdateResult.fuel_capacity){
+        msg = "Fuel available can not be greater then fuel capacity";
+        condition = true;
+    }
+    if (parseInt(airportUpdateResult.fuel_available) < 0) {
+        msg = "Fuel available can not be negative";
+        condition = true;
+    }
 
+    if(condition){
+        await session.abortTransaction();
+        session.endSession();
+    
+        return res.status(201).json({
+            msg: msg
+        })
+    }
+    
+}
 // Update operation
 const updateTransaction = async (req, res, next) => {
     try {
@@ -281,25 +302,28 @@ const updateTransaction = async (req, res, next) => {
                     { airport_id: req.body.airport_id },
                     { $inc: { fuel_available: req.body.transaction_type === 'OUT' ? -req.body.quantity : req.body.quantity } }, opts);
 
-                // Check fuel available must not be greater then fuel capacity
-                if (parseInt(airportUpdateResult.fuel_available) > airportUpdateResult.fuel_capacity) {
-                    await session.abortTransaction();
-                    session.endSession();
-                    console.log("Fuel available can not be greater then fuel capacity")
-                    return res.status(201).json({
-                        msg: "Fuel available can not be greater then fuel capacity"
-                    })
-                }
 
-                // Check fuel available must not be negative
-                if (parseInt(airportUpdateResult.fuel_available) < 0) {
-                    await session.abortTransaction();
-                    session.endSession();
-                    console.log("Fuel available can not be negative")
-                    return res.status(201).json({
-                        msg: "Fuel available can not be negative"
-                    })
-                }
+                // // Check fuel available must not be greater then fuel capacity
+                // if (parseInt(airportUpdateResult.fuel_available) > airportUpdateResult.fuel_capacity) {
+                //     await session.abortTransaction();
+                //     session.endSession();
+                //     // console.log("Fuel available can not be greater then fuel capacity")
+                //     return res.status(201).json({
+                //         msg: "Fuel available can not be greater then fuel capacity"
+                //     })
+                // }
+
+                await checkCondition(airportUpdateResult, session, res);
+
+                // // Check fuel available must not be negative
+                // if (parseInt(airportUpdateResult.fuel_available) < 0) {
+                //     await session.abortTransaction();
+                //     session.endSession();
+                //     // console.log("Fuel available can not be negative")
+                //     return res.status(201).json({
+                //         msg: "Fuel available can not be negative"
+                //     })
+                // }
                 const transactionCreateResult = await Transaction.findOneAndUpdate({ transaction_id: req.params.transaction_id }, {
                     transaction_type: req.body.transaction_type,
                     airport_id: req.body.airport_id,

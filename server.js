@@ -19,10 +19,10 @@ app.use(function (req, res, next) {
 app.use(express.json())
 app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerDocument))
 
-const { airportRouter } = require("./api/routes/airportRoute")
-const { aircraftRouter } = require("./api/routes/aircraftRoute")
-const { transactionRouter } = require("./api/routes/transactionRoute")
-const { userRouter } = require("./api/routes/userRoute")
+const { airportRouter } = require("./routes/airportRoute")
+const { aircraftRouter } = require("./routes/aircraftRoute")
+const { transactionRouter } = require("./routes/transactionRoute")
+const { userRouter } = require("./routes/userRoute")
 
 mongoose.connect(
     process.env.MONGODB_URL

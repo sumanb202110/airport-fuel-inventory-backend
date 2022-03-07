@@ -1,7 +1,7 @@
 const { Router } = require("express")
 const aircraftRouter = Router()
 
-const { auth } = require("../../middlewares/auth")
+const { auth } = require("../middlewares/auth")
 const { createAircraft, getAircrafts, deleteAircraft, updateAircraft, getAircraftById } = require("../controllers/aircraftConroler")
 
 aircraftRouter.route("/").get(auth, getAircrafts)

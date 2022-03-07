@@ -1,8 +1,8 @@
 const mongoose = require("mongoose")
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
-const User = require("../../models/user")
-const Token = require("../../models/token")
+const User = require("../models/user")
+const Token = require("../models/token")
 
 
 const jwtKey = process.env.JWT_KEY

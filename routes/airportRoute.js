@@ -1,7 +1,7 @@
 const { Router } = require("express")
 const airportRouter = Router()
 
-const { auth } = require("../../middlewares/auth")
+const { auth } = require("../middlewares/auth")
 
 const { getAirports, createAirport, updateAirport, deleteAirport, getAirportById, getTransactionsByAirport, getAirportsReport } = require("../controllers/airportController")
 

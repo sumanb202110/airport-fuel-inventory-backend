@@ -1,5 +1,5 @@
 const mongoose = require("mongoose")
-const Aircraft = require("../../models/aircraft")
+const Aircraft = require("../models/aircraft")
 
 
 
