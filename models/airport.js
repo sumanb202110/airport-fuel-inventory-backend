@@ -1,4 +1,4 @@
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
 
 const airportSchema = mongoose.Schema({
     airport_id: { type: String, require: true },
@@ -6,6 +6,6 @@ const airportSchema = mongoose.Schema({
     fuel_capacity: Number,
     fuel_available: Number
 
-})
+});
 
-module.exports = mongoose.model('Airport', airportSchema)
+module.exports = mongoose.model("Airport", airportSchema);

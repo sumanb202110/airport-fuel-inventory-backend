@@ -1,4 +1,4 @@
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
 
 const transactionSchema = mongoose.Schema({
     transaction_id: mongoose.Schema.Types.ObjectId,
@@ -8,6 +8,6 @@ const transactionSchema = mongoose.Schema({
     aircraft_id: String,
     quantity: Number,
     transaction_id_parent: String
-})
+});
 
-module.exports = mongoose.model('Transaction', transactionSchema)
+module.exports = mongoose.model('Transaction', transactionSchema);
