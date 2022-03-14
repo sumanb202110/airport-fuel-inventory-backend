@@ -1,8 +1,8 @@
-const mongoose = require("mongoose");
+// const mongoose = require("mongoose");
 const Transaction = require("../models/transaction");
 const transaction = require("../services/transaction.service");
 
-const Airport = require("../models/airport");
+// const Airport = require("../models/airport");
 
 
 /**
@@ -15,10 +15,10 @@ const Airport = require("../models/airport");
 const getTransactions = async (req, res) => {
     const page = req.query.page || 1;
     const count = req.query.count || 100;
-    try{
+    try {
         res.status(200).json(
             await transaction.getTransactions(page, count, req.query.airport_ids, req.query.aircraft_ids, req.query.transaction_types, req.query.sort_by));
-    }catch (err) {
+    } catch (err) {
         res.status(400).json(err).send();
     }
 };
@@ -27,87 +27,13 @@ const getTransactions = async (req, res) => {
 const getTransactionById = async (req, res) => {
     const transactionId = req.params.transaction_id;
     try {
-        const result = await Transaction.findOne({ transaction_id: transactionId });
-        return res.status(200).json({
-            transaction_id: result.transaction_id,
-            transaction_date_time: result.transaction_date_time,
-            transaction_type: result.transaction_type,
-            airport_id: result.airport_id,
-            aircraft_id: result.aircraft_id,
-            quantity: result.quantity,
-            transaction_id_parent: result.transaction_id_parent
-        });
+        res.status(200).json(
+            await transaction.getTransactionById(transactionId)
+        );
     } catch (err) {
-        console.log(err);
-        res.status(400).json({
-            msg: "Error"
-        }).send();
+        res.status(400).json(err).send();
     }
 };
-
-async function updateFuelInventory(req, res) {
-    const transaction = new Transaction({
-        transaction_id: new mongoose.Types.ObjectId(),
-        transaction_type: req.body.transaction_type,
-        airport_id: req.body.airport_id,
-        aircraft_id: req.body.aircraft_id,
-        quantity: req.body.quantity,
-        transaction_id_parent: req.body.transaction_id_parent
-    });
-
-    const session = await Airport.startSession();
-    session.startTransaction();
-
-    try {
-        const opts = { session };
-        const airportUpdateResult = await Airport.findOneAndUpdate(
-            { airport_id: req.body.airport_id },
-            { $inc: { fuel_available: req.body.transaction_type === 'OUT' ? -req.body.quantity : req.body.quantity } }, opts);
-
-        // Check fuel available must not be greater then fuel capacity
-        if (parseInt(airportUpdateResult.fuel_available) > airportUpdateResult.fuel_capacity) {
-            await session.abortTransaction();
-            session.endSession();
-            return res.status(201).json({
-                msg: "Fuel available can not be greater then fuel capacity"
-            });
-        }
-
-        // Check fuel available must not be negative
-        if (parseInt(airportUpdateResult.fuel_available) < 0) {
-            await session.abortTransaction();
-            session.endSession();
-            return res.status(201).json({
-                msg: "Fuel available can not be negative"
-            });
-        }
-        const transactionCreateResult = await transaction.save(opts);
-
-
-
-        await session.commitTransaction();
-        session.endSession();
-
-        res.status(201).json({
-            transaction_id: transactionCreateResult.transaction_id,
-            transaction_date_time: transactionCreateResult.transaction_date_time,
-            transaction_type: transactionCreateResult.transaction_type,
-            airport_id: transactionCreateResult.airport_id,
-            aircraft_id: transactionCreateResult.aircraft_id,
-            quantity: transactionCreateResult.quantity,
-            transaction_id_parent: transactionCreateResult?.transaction_id_parent
-        });
-    } catch (error) {
-        // If an error occurred, abort the whole transaction and
-        // undo any changes that might have happened
-        await session.abortTransaction();
-        session.endSession();
-        return res.status(201).json({
-            msg: "Error"
-        }).send();
-    }
-}
-
 // Create operation
 const createTransaction = async (req, res) => {
     try {
@@ -128,15 +54,21 @@ const createTransaction = async (req, res) => {
                 msg: "Please provide aircraftid in OUT transaction"
             });
         }
+        const transactionData = {
+            transaction_type: req.body.transaction_type,
+            airport_id: req.body.airport_id,
+            aircraft_id: req.body.aircraft_id,
+            quantity: req.body.quantity,
+            transaction_id_parent: req.body.transaction_id_parent
+        };
 
-
-        await updateFuelInventory(req, res);
-
-
-
-
-
-
+        try {
+            res.status(200).json(
+                await transaction.updateFuelInventory(transactionData)
+            );
+        } catch (err) {
+            res.status(400).json(err).send();
+        }
 
     } catch (err) {
         if (err.code === 11000) {
@@ -150,88 +82,6 @@ const createTransaction = async (req, res) => {
     }
 
 };
-
-// const checkCondition = async (airportUpdateResult, session, res) => {
-//     let msg = "";
-//     let condition = false;
-//     if (parseInt(airportUpdateResult.fuel_available) > airportUpdateResult.fuel_capacity) {
-//         msg = "Fuel available can not be greater then fuel capacity";
-//         condition = true;
-//     }
-//     if (parseInt(airportUpdateResult.fuel_available) < 0) {
-//         msg = "Fuel available can not be negative";
-//         condition = true;
-//     }
-
-//     if (condition) {
-//         await session.abortTransaction();
-//         session.endSession();
-
-//         return res.status(201).json({
-//             msg: msg
-//         });
-//     }
-
-// };
-/*
-async function updateFuelInventory(req, res) {
-    const session = await Airport.startSession();
-    session.startTransaction();
-
-    try {
-        const opts = { session };
-        const airportUpdateResult = await Airport.findOneAndUpdate(
-            { airport_id: req.body.airport_id },
-            { $inc: { fuel_available: req.body.transaction_type === "OUT" ? -req.body.quantity : req.body.quantity } }, opts);
-
-
-        // // Check fuel available must not be greater then fuel capacity
-        // if (parseInt(airportUpdateResult.fuel_available) > airportUpdateResult.fuel_capacity) {
-        //     await session.abortTransaction();
-        //     session.endSession();
-        //     // console.log("Fuel available can not be greater then fuel capacity")
-        //     return res.status(201).json({
-        //         msg: "Fuel available can not be greater then fuel capacity"
-        //     })
-        // }
-
-        await checkCondition(airportUpdateResult, session, res);
-
-        // // Check fuel available must not be negative
-        // if (parseInt(airportUpdateResult.fuel_available) < 0) {
-        //     await session.abortTransaction();
-        //     session.endSession();
-        //     // console.log("Fuel available can not be negative")
-        //     return res.status(201).json({
-        //         msg: "Fuel available can not be negative"
-        //     })
-        // }
-        await Transaction.findOneAndUpdate({ transaction_id: req.params.transaction_id }, {
-            transaction_type: req.body.transaction_type,
-            airport_id: req.body.airport_id,
-            aircraft_id: req.body.aircraft_id,
-            quantity: req.body.quantity,
-        }, opts);
-
-
-
-        await session.commitTransaction();
-        session.endSession();
-
-        res.status(201).json({
-            msg: "New transaction successfully updated"
-        });
-    } catch (error) {
-        // If an error occurred, abort the whole transaction and
-        // undo any changes that might have happened
-        await session.abortTransaction();
-        session.endSession();
-        return res.status(400).json({
-            msg: "Error"
-        }).send();
-    }
-}
-*/
 
 // Update operation
 const updateTransaction = async (req, res) => {
@@ -254,8 +104,23 @@ const updateTransaction = async (req, res) => {
             });
         }
 
+        const transactionData = {
+            transaction_id: req.body.transaction_id,
+            transaction_type: req.body.transaction_type,
+            airport_id: req.body.airport_id,
+            aircraft_id: req.body.aircraft_id,
+            quantity: req.body.quantity,
+            transaction_id_parent: req.body.transaction_id_parent
+        };
 
-        await updateFuelInventory(req, res);
+        try {
+            res.status(200).json(
+                await transaction.updateFuelInventory(transactionData)
+            );
+        } catch (err) {
+            res.status(400).json(err).send();
+        }
+
 
     } catch (err) {
         if (err.code === 11000) {

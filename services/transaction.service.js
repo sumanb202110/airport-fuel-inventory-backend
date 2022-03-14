@@ -1,4 +1,7 @@
+const mongoose = require("mongoose");
 const Transaction = require("../models/transaction");
+const Airport = require("../models/airport");
+
 
 const getTransactions = async (page, count, airportIds, aircraftIds, transactionTypes, sortBy) => {
     let aggregateArr = [
@@ -101,12 +104,103 @@ const getTransactions = async (page, count, airportIds, aircraftIds, transaction
             ]
         };
     } catch (err) {
-        throw{
+        throw {
             msg: "Error"
         };
     }
 };
 
+const getTransactionById = async (transactionId) => {
+    try {
+        const result = await Transaction.findOne({ transaction_id: transactionId });
+        return {
+            transaction_id: result.transaction_id,
+            transaction_date_time: result.transaction_date_time,
+            transaction_type: result.transaction_type,
+            airport_id: result.airport_id,
+            aircraft_id: result.aircraft_id,
+            quantity: result.quantity,
+            transaction_id_parent: result.transaction_id_parent
+        };
+    } catch (err) {
+        throw {
+            msg: "Error"
+        };
+    }
+};
+
+const updateFuelInventory = async (transactionData) => {
+    const transaction = {
+        transaction_type: transactionData.transaction_type,
+        airport_id: transactionData.airport_id,
+        aircraft_id: transactionData.aircraft_id,
+        quantity: transactionData.quantity,
+        transaction_id_parent: transactionData.transaction_id_parent
+    };
+
+    const session = await Airport.startSession();
+    session.startTransaction();
+
+    try {
+        const opts = { session };
+        const airportUpdateResult = await Airport.findOneAndUpdate(
+            { airport_id: transactionData.airport_id },
+            { $inc: { fuel_available: transactionData.transaction_type === 'OUT' ? -transactionData.quantity : transactionData.quantity } }, opts);
+
+        // Check fuel available must not be greater then fuel capacity
+        if (parseInt(airportUpdateResult.fuel_available) > airportUpdateResult.fuel_capacity) {
+            await session.abortTransaction();
+            session.endSession();
+            throw {
+                msg: "Fuel available can not be greater then fuel capacity"
+            };
+        }
+
+        // Check fuel available must not be negative
+        if (parseInt(airportUpdateResult.fuel_available) < 0) {
+            await session.abortTransaction();
+            session.endSession();
+            throw {
+                msg: "Fuel available can not be negative"
+            };
+        }
+        let transactionCreateResult = await Transaction.findOneAndUpdate(
+            { transaction_id: new mongoose.Types.ObjectId(transactionData.transaction_id) },
+            transaction,
+            {
+                session: opts.session,
+                upsert: true,
+                new: true
+            }
+        );
+
+
+
+
+        await session.commitTransaction();
+        session.endSession();
+
+        return {
+            transaction_id: transactionCreateResult.transaction_id,
+            transaction_date_time: transactionCreateResult.transaction_date_time,
+            transaction_type: transactionCreateResult.transaction_type,
+            airport_id: transactionCreateResult.airport_id,
+            aircraft_id: transactionCreateResult.aircraft_id,
+            quantity: transactionCreateResult.quantity,
+            transaction_id_parent: transactionCreateResult?.transaction_id_parent
+        };
+    } catch (error) {
+        // If an error occurred, abort the whole transaction and
+        // undo any changes that might have happened
+        await session.abortTransaction();
+        session.endSession();
+        throw {
+            msg: "Error"
+        };
+    }
+};
 module.exports = {
-    getTransactions
+    getTransactions,
+    getTransactionById,
+    updateFuelInventory
 };
