@@ -1,118 +1,25 @@
 const mongoose = require("mongoose");
 const Transaction = require("../models/transaction");
+const transaction = require("../services/transaction.service");
+
 const Airport = require("../models/airport");
 
 
-
-// Read operation
+/**
+ * This function is used to get transactions details from the database
+ * 
+ * @param {*} req 
+ * @param {*} res 
+ * @returns 
+ */
 const getTransactions = async (req, res) => {
     const page = req.query.page || 1;
     const count = req.query.count || 100;
-    let aggregateArr = [
-        {
-            '$set': {
-                'quantity': {
-                    '$convert': {
-                        'input': '$quantity',
-                        'to': 'int'
-                    }
-                }
-            }
-        }
-    ];
-
-    if (req.query.airport_ids !== undefined) {
-        aggregateArr.push(
-            {
-                "$match": {
-                    "$or": req.query.airport_ids?.split(",").map((data) => { return { airport_id: data }; })
-                }
-            }
-        );
-    }
-
-    if (req.query.aircraft_ids !== undefined) {
-        aggregateArr.push(
-            {
-                "$match": {
-                    "$or": req.query.aircraft_ids?.split(",").map((data) => { return { aircraft_id: data }; })
-                }
-            }
-        );
-    }
-
-    if (req.query.transaction_types !== undefined) {
-        aggregateArr.push(
-            {
-                "$match": {
-                    "$or": req.query.transaction_types?.split(",").map((data) => { return { transaction_type: data }; })
-                }
-            }
-        );
-    }
-
-
-
-    if (req.query.sort_by === "DATE_HIGH_LOW") {
-        aggregateArr.push({
-            "$sort": {
-                "transaction_date_time": -1
-            }
-        });
-    } else if (req.query.sort_by === "DATE_LOW_HIGH") {
-        aggregateArr.push({
-            "$sort": {
-                "transaction_date_time": 1
-            }
-        });
-    } else if (req.query.sort_by === "QUANTITY_LOW_HIGH") {
-        aggregateArr.push({
-            "$sort": {
-                "quantity": 1
-            }
-        });
-    } else if (req.query.sort_by === "QUANTITY_HIGH_LOW") {
-        aggregateArr.push({
-            "$sort": {
-                "quantity": -1
-            }
-        });
-    } else {
-        aggregateArr.push({
-            "$sort": {
-                "transaction_date_time": -1
-            }
-        });
-    }
-    try {
-        const result = await Transaction.aggregate(
-            aggregateArr
-        ).skip((parseInt(page) - 1) * parseInt(count)).limit(parseInt(count));
-        const resultCount = await Transaction.find().count();
-        return res.status(200).json(
-            {
-                currentPage: page,
-                itemsPerPage: result.length,
-                totalPages: Math.ceil(resultCount / count),
-                totalItems: resultCount,
-                data: [...result.map((data) => {
-                    return {
-                        transaction_id: data.transaction_id,
-                        transaction_date_time: data.transaction_date_time,
-                        transaction_type: data.transaction_type,
-                        airport_id: data.airport_id,
-                        aircraft_id: data.aircraft_id,
-                        quantity: data.quantity,
-                        transaction_id_parent: data.transaction_id_parent
-                    };
-                })
-                ]
-            });
-    } catch (err) {
-        console.log(err);
-        res.status(400).json({
-            msg: "Error"
-        }).send();
+    try{
+        res.status(200).json(
+            await transaction.getTransactions(page, count, req.query.airport_ids, req.query.aircraft_ids, req.query.transaction_types, req.query.sort_by));
+    }catch (err) {
+        res.status(400).json(err).send();
     }
 };
 
@@ -225,7 +132,7 @@ const createTransaction = async (req, res) => {
 
         await updateFuelInventory(req, res);
 
-        
+
 
 
 
@@ -351,7 +258,7 @@ const updateTransaction = async (req, res) => {
         await updateFuelInventory(req, res);
 
     } catch (err) {
-        if (err.code === 11000){
+        if (err.code === 11000) {
             res.status(400).json({
                 msg: "Duplicate entry"
             });
@@ -368,7 +275,7 @@ const deleteTransaction = async (req, res) => {
     try {
         await Transaction.deleteOne({ transaction_id: req.params.transaction_id });
         return res.status(204).send();
-    }catch (err) {
+    } catch (err) {
         res.status(400).json({
             msg: "Error"
         }).send();
