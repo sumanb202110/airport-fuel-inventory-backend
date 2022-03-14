@@ -1,0 +1,135 @@
+const Airport = require("../models/airport");
+const Transaction = require("../models/transaction");
+
+const getAirports = async (page, count) => {
+    try {
+        const result = await Airport.aggregate(
+            [
+                {
+                    '$lookup': {
+                        'from': 'airports_transactions',
+                        'localField': 'airport_id',
+                        'foreignField': '_id',
+                        'as': 'airport_transactions'
+                    }
+                }, {
+                    '$unwind': {
+                        'path': '$airport_transactions',
+                        'preserveNullAndEmptyArrays': true
+                    }
+                }, {
+                    '$project': {
+                        '_id': 1,
+                        'airport_id': '$airport_id',
+                        'airport_name': '$airport_name',
+                        'fuel_capacity': '$fuel_capacity',
+                        'fuel_available': '$fuel_available',
+                        'transactions': '$airport_transactions.transactions'
+                    }
+                }
+            ]
+        ).skip((parseInt(page) - 1) * parseInt(count)).limit(parseInt(count));
+        const resultCount = await Airport.find().count();
+        return {
+            currentPage: page,
+            itemsPerPage: result.length,
+            totalPages: Math.ceil(resultCount / count),
+            totalItems: resultCount,
+            data: [...result.map((data) => {
+                return {
+                    airport_id: data.airport_id,
+                    airport_name: data.airport_name,
+                    fuel_capacity: data.fuel_capacity,
+                    fuel_available: data.fuel_available,
+                    transactions: data.transactions
+                };
+            })]
+        };
+    } catch (err) {
+        throw {
+            msg: "Error"
+        };
+    }
+};
+
+const getTransactionsByAirport = async (page, count, airportId) => {
+    try {
+        const result = await Transaction.find({ airport_id: airportId })
+            .sort({ transaction_date_time: -1 }).skip((parseInt(page) - 1) * parseInt(count)).limit(parseInt(count));
+        const resultCount = await Transaction.find().count();
+        return {
+            currentPage: page,
+            itemsPerPage: result.length,
+            totalPages: Math.ceil(resultCount / count),
+            totalItems: resultCount,
+            data: [...result.map((data) => {
+                return {
+                    transaction_id: data.transaction_id,
+                    transaction_date_time: data.transaction_date_time,
+                    transaction_type: data.transaction_type,
+                    airport_id: data.airport_id,
+                    aircraft_id: data.aircraft_id,
+                    quantity: data.quantity,
+                    transaction_id_parent: data.transaction_id_parent
+                };
+            })
+            ]
+        };
+    } catch (err) {
+        throw {
+            msg: "Error"
+        };
+    }
+};
+
+const getAirportById = async (airportId) => {
+    try {
+        const result = await Airport.findOne({ airport_id: airportId });
+        return {
+            airport_id: result.airport_id,
+            airport_name: result.airport_name,
+            fuel_capacity: result.fuel_capacity,
+            fuel_available: result.fuel_available
+        };
+    } catch (err) {
+        throw {
+            msg: "Error"
+        };
+    }
+};
+
+const createAirport = async (airportData) => {
+    try {
+        const airport = new Airport({
+            airport_id: airportData.airport_id,
+            airport_name: airportData.airport_name,
+            fuel_capacity: airportData.fuel_capacity,
+            fuel_available: airportData.fuel_available
+        });
+        const createAirportResult = await airport.save();
+
+        return {
+            airport_id: createAirportResult.airport_id,
+            airport_name: createAirportResult.airport_name,
+            fuel_capacity: createAirportResult.fuel_capacity,
+            fuel_available: createAirportResult.fuel_available,
+            transactions: createAirportResult.transactions
+        };
+
+    } catch (err) {
+        if (err.code === 11000) {
+            throw{
+                msg: "Duplicate entry"
+            };
+        }
+        throw{
+            msg: "Error"
+        };
+    }
+};
+module.exports = {
+    getAirports,
+    getTransactionsByAirport,
+    getAirportById,
+    createAirport
+};

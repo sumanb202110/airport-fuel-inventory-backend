@@ -1,6 +1,8 @@
 // const mongoose = require("mongoose");
 const Airport = require("../models/airport");
-const Transaction = require("../models/transaction");
+// const Transaction = require("../models/transaction");
+const airport = require("../services/airport.service");
+
 
 
 
@@ -11,53 +13,9 @@ const getAirports = async (req, res) => {
     const page = req.query.page || 1;
     const count = req.query.count || 100;
     try {
-        const result = await Airport.aggregate(
-            [
-                {
-                    '$lookup': {
-                        'from': 'airports_transactions',
-                        'localField': 'airport_id',
-                        'foreignField': '_id',
-                        'as': 'airport_transactions'
-                    }
-                }, {
-                    '$unwind': {
-                        'path': '$airport_transactions',
-                        'preserveNullAndEmptyArrays': true
-                    }
-                }, {
-                    '$project': {
-                        '_id': 1,
-                        'airport_id': '$airport_id',
-                        'airport_name': '$airport_name',
-                        'fuel_capacity': '$fuel_capacity',
-                        'fuel_available': '$fuel_available',
-                        'transactions': '$airport_transactions.transactions'
-                    }
-                }
-            ]
-        ).skip((parseInt(page) - 1) * parseInt(count)).limit(parseInt(count));
-        const resultCount = await Airport.find().count();
-        return res.status(200).json(
-            {
-                currentPage: page,
-                itemsPerPage: result.length,
-                totalPages: Math.ceil(resultCount / count),
-                totalItems: resultCount,
-                data: [...result.map((data) => {
-                    return {
-                        airport_id: data.airport_id,
-                        airport_name: data.airport_name,
-                        fuel_capacity: data.fuel_capacity,
-                        fuel_available: data.fuel_available,
-                        transactions: data.transactions
-                    };
-                })]
-            });
+        res.status(200).json(await airport.getAirports(page, count));
     }catch (err) {
-        res.status(400).json({
-            msg: "Error"
-        }).send();
+        res.status(400).json(err).send();
     }
 };
 
@@ -68,32 +26,9 @@ const getTransactionsByAirport = async (req, res) => {
 
     const airportId = req.params.airport_id;
     try {
-        const result = await Transaction.find({ airport_id: airportId })
-            .sort({ transaction_date_time: -1 }).skip((parseInt(page) - 1) * parseInt(count)).limit(parseInt(count));
-        const resultCount = await Transaction.find().count();
-        return res.status(200).json(
-            {
-                currentPage: page,
-                itemsPerPage: result.length,
-                totalPages: Math.ceil(resultCount / count),
-                totalItems: resultCount,
-                data: [...result.map((data) => {
-                    return {
-                        transaction_id: data.transaction_id,
-                        transaction_date_time: data.transaction_date_time,
-                        transaction_type: data.transaction_type,
-                        airport_id: data.airport_id,
-                        aircraft_id: data.aircraft_id,
-                        quantity: data.quantity,
-                        transaction_id_parent: data.transaction_id_parent
-                    };
-                })
-                ]
-            });
+        res.status(200).json(await airport.getTransactionsByAirport(page, count, airportId));
     }catch (err) {
-        res.status(400).json({
-            msg: "Error"
-        }).send();
+        res.status(400).json(err).send();
     }
 };
 
@@ -101,18 +36,9 @@ const getTransactionsByAirport = async (req, res) => {
 const getAirportById = async (req, res) => {
     const airportId = req.params.airport_id;
     try {
-        const result = await Airport.findOne({ airport_id: airportId });
-        return res.status(200).json(
-            {
-                airport_id: result.airport_id,
-                airport_name: result.airport_name,
-                fuel_capacity: result.fuel_capacity,
-                fuel_available: result.fuel_available
-            });
+        res.status(200).json(await airport.getAirportById(airportId)).send();
     }catch (err) {
-        res.status(400).json({
-            msg: "Error"
-        }).send();
+        res.status(400).json(err).send();
     }
 };
 
@@ -148,31 +74,17 @@ const createAirport = async (req, res) => {
         }
 
 
-        const airport = new Airport({
+        const airportData = {
             airport_id: req.body.airport_id,
             airport_name: req.body.airport_name,
             fuel_capacity: req.body.fuel_capacity,
             fuel_available: req.body.fuel_available
-        });
-        const createAirportResult = await airport.save();
+        };
 
-        res.status(201).json({
-            airport_id: createAirportResult.airport_id,
-            airport_name: createAirportResult.airport_name,
-            fuel_capacity: createAirportResult.fuel_capacity,
-            fuel_available: createAirportResult.fuel_available,
-            transactions: createAirportResult.transactions
-        });
+        res.status(201).json(await airport.createAirport(airportData));
 
     }catch (err) {
-        if (err.code === 11000) {
-            return res.status(400).json({
-                msg: "Duplicate entry"
-            }).send();
-        }
-        res.status(400).json({
-            msg: "Error"
-        }).send();
+        res.status(400).json(err).send();
     }
 };
 

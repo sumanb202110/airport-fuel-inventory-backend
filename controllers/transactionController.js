@@ -58,7 +58,7 @@ const createTransaction = async (req, res) => {
         };
 
         try {
-            res.status(200).json(
+            res.status(201).json(
                 await transaction.updateFuelInventory(transactionData)
             );
         } catch (err) {
