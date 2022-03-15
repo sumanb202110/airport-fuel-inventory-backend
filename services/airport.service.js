@@ -118,10 +118,148 @@ const createAirport = async (airportData) => {
 
     } catch (err) {
         if (err.code === 11000) {
-            throw{
+            throw {
                 msg: "Duplicate entry"
             };
         }
+        throw {
+            msg: "Error"
+        };
+    }
+};
+
+const updateAirport = async (airportData) => {
+    try {
+        await Airport.findOneAndUpdate({ airport_id: airportData.airport_id },
+            {
+                airport_name: airportData.airport_name,
+                fuel_capacity: airportData.fuel_capacity,
+                fuel_available: airportData.fuel_available
+            }
+        );
+        return {
+            msg: "Airport successfully updated"
+        };
+
+    } catch (err) {
+        if (err.code === 11000) {
+            throw {
+                msg: "Duplicate entry"
+            };
+        }
+        throw {
+            msg: "Error"
+        };
+    }
+};
+
+const deleteAirport = async (airportId) => {
+    try {
+        await Airport.deleteOne({ airport_id: airportId });
+        return;
+    } catch (err) {
+        throw {
+            msg: "Error"
+        };
+    }
+};
+
+const getAirportsReport = async () => {
+    try {
+        const resultAirportLTE20 = await Airport.aggregate(
+            [
+                {
+                    '$project': {
+                        'airport_id': 1,
+                        'airport_name': 1,
+                        'fuel_capacity': 1,
+                        'fuel_available': 1,
+                        'available_percentage': {
+                            '$round': [
+                                {
+                                    '$multiply': [
+                                        {
+                                            '$divide': [
+                                                '$fuel_available', '$fuel_capacity'
+                                            ]
+                                        }, 100
+                                    ]
+                                }, 2
+                            ]
+                        }
+                    }
+                }, {
+                    '$sort': {
+                        'available_percentage': 1
+                    }
+                }, {
+                    '$match': {
+                        'available_percentage': {
+                            '$lte': 20
+                        }
+                    }
+                }
+            ]
+        );
+        const resultAirportGTE80 = await Airport.aggregate(
+            [
+                {
+                    '$project': {
+                        'airport_id': 1,
+                        'airport_name': 1,
+                        'fuel_capacity': 1,
+                        'fuel_available': 1,
+                        'available_percentage': {
+                            '$round': [
+                                {
+                                    '$multiply': [
+                                        {
+                                            '$divide': [
+                                                '$fuel_available', '$fuel_capacity'
+                                            ]
+                                        }, 100
+                                    ]
+                                }, 2
+                            ]
+                        }
+                    }
+                }, {
+                    '$sort': {
+                        'available_percentage': 1
+                    }
+                }, {
+                    '$match': {
+                        'available_percentage': {
+                            '$gte': 80
+                        }
+                    }
+                }
+            ]
+        );
+        return {
+
+            airportLTE20: [...resultAirportLTE20.map((data) => {
+                return {
+                    airport_id: data.airport_id,
+                    airport_name: data.airport_name,
+                    fuel_capacity: data.fuel_capacity,
+                    fuel_available: data.fuel_available,
+                    available_percentage: data.available_percentage,
+
+                };
+            })],
+            airportGTE80: [...resultAirportGTE80.map((data) => {
+                return {
+                    airport_id: data.airport_id,
+                    airport_name: data.airport_name,
+                    fuel_capacity: data.fuel_capacity,
+                    fuel_available: data.fuel_available,
+                    available_percentage: data.available_percentage,
+
+                };
+            })]
+        };
+    } catch (err) {
         throw{
             msg: "Error"
         };
@@ -131,5 +269,8 @@ module.exports = {
     getAirports,
     getTransactionsByAirport,
     getAirportById,
-    createAirport
+    createAirport,
+    updateAirport,
+    deleteAirport,
+    getAirportsReport
 };

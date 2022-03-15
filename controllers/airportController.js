@@ -1,6 +1,3 @@
-// const mongoose = require("mongoose");
-const Airport = require("../models/airport");
-// const Transaction = require("../models/transaction");
 const airport = require("../services/airport.service");
 
 
@@ -120,146 +117,36 @@ const updateAirport = async (req, res) => {
         }
 
 
-        // const airport = new Airport({
-        //     fuel_capacity: req.body.fuel_capacity,
-        //     fuel_available: req.body.fuel_available
-        // })
-        await Airport.findOneAndUpdate({ airport_id: req.params.airport_id },
-            {
-                airport_name: req.body.airport_name,
-                fuel_capacity: req.body.fuel_capacity,
-                fuel_available: req.body.fuel_available
-            }
-        );
-        res.status(200).json({
-            msg: "Airport successfully updated"
-        });
-
+        const airportData = {
+            airport_id: req.body.airport_id,
+            airport_name: req.body.airport_name,
+            fuel_capacity: req.body.fuel_capacity,
+            fuel_available: req.body.fuel_available
+        };
+        
+        res.status(200).json(await airport.updateAirport(airportData));
+        
     }catch (err) {
-        if (err.code === 11000) {
-            return res.status(400).json({
-                msg: "Duplicate entry"
-            }).send();
-        }
-        res.status(400).json({
-            msg: "Error"
-        }).send();
+        res.status(400).json(err).send();
     }
 };
 
 // Delete Airport
 const deleteAirport = async (req, res) => {
     try {
-        await Airport.deleteOne({ airport_id: req.params.airport_id });
+        await airport.deleteAirport(req.params.airport_id);
         return res.status(204).send();
     }catch (err) {
-        res.status(400).json({
-            msg: "Error"
-        }).send();
+        res.status(400).json(err).send();
     }
 };
 
 // Airport report
 const getAirportsReport = async (req, res) => {
     try {
-        const resultAirportLTE20 = await Airport.aggregate(
-            [
-                {
-                    '$project': {
-                        'airport_id': 1,
-                        'airport_name': 1,
-                        'fuel_capacity': 1,
-                        'fuel_available': 1,
-                        'available_percentage': {
-                            '$round': [
-                                {
-                                    '$multiply': [
-                                        {
-                                            '$divide': [
-                                                '$fuel_available', '$fuel_capacity'
-                                            ]
-                                        }, 100
-                                    ]
-                                }, 2
-                            ]
-                        }
-                    }
-                }, {
-                    '$sort': {
-                        'available_percentage': 1
-                    }
-                }, {
-                    '$match': {
-                        'available_percentage': {
-                            '$lte': 20
-                        }
-                    }
-                }
-            ]
-        );
-        const resultAirportGTE80 = await Airport.aggregate(
-            [
-                {
-                    '$project': {
-                        'airport_id': 1,
-                        'airport_name': 1,
-                        'fuel_capacity': 1,
-                        'fuel_available': 1,
-                        'available_percentage': {
-                            '$round': [
-                                {
-                                    '$multiply': [
-                                        {
-                                            '$divide': [
-                                                '$fuel_available', '$fuel_capacity'
-                                            ]
-                                        }, 100
-                                    ]
-                                }, 2
-                            ]
-                        }
-                    }
-                }, {
-                    '$sort': {
-                        'available_percentage': 1
-                    }
-                }, {
-                    '$match': {
-                        'available_percentage': {
-                            '$gte': 80
-                        }
-                    }
-                }
-            ]
-        );
-        return res.status(200).json(
-            {
-
-                airportLTE20: [...resultAirportLTE20.map((data) => {
-                    return {
-                        airport_id: data.airport_id,
-                        airport_name: data.airport_name,
-                        fuel_capacity: data.fuel_capacity,
-                        fuel_available: data.fuel_available,
-                        available_percentage: data.available_percentage,
-
-                    };
-                })],
-                airportGTE80: [...resultAirportGTE80.map((data) => {
-                    return {
-                        airport_id: data.airport_id,
-                        airport_name: data.airport_name,
-                        fuel_capacity: data.fuel_capacity,
-                        fuel_available: data.fuel_available,
-                        available_percentage: data.available_percentage,
-
-                    };
-                })]
-            });
+        res.status(200).json(await airport.getAirportsReport()).send();
     }catch (err) {
-        res.status(400).json({
-            msg: "Error"
-        }).send();
+        res.status(400).json(err).send();
     }
 };
 
