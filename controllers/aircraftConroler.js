@@ -1,5 +1,4 @@
-// const mongoose = require("mongoose");
-const Aircraft = require("../models/aircraft");
+const aircraft = require("../services/aircraft.service");
 
 
 
@@ -8,27 +7,9 @@ const getAircrafts = async (req, res) => {
     const page = req.query.page || 1;
     const count = req.query.count || 100;
     try {
-        const result = await Aircraft.find().skip((parseInt(page) - 1) * parseInt(count)).limit(parseInt(count));
-        const resultCount = await Aircraft.find().count();
-        return res.status(200).json(
-            {
-                currentPage: page,
-                itemsPerPage: result.length,
-                totalPages: Math.ceil(resultCount / count),
-                totalItems: resultCount,
-                data: [...result.map((data) => {
-                    return {
-                        aircraft_id: data.aircraft_id,
-                        aircraft_no: data.aircraft_no,
-                        airline: data.airline
-                    };
-                })]
-            });
+        res.status(200).json(await aircraft.getAircrafts(page, count));
     } catch (err) {
-        console.log(err);
-        res.status(400).json({
-            msg: "Error"
-        });
+        res.status(400).json(err).send();
     }
 };
 
@@ -36,120 +17,51 @@ const getAircrafts = async (req, res) => {
 const getAircraftById = async (req, res) => {
     const aircraftId = req.params.aircraft_id;
     try {
-        const result = await Aircraft.findOne({ aircraft_id: aircraftId });
-        return res.status(200).json({
-            aircraft_id: result.aircraft_id,
-            aircraft_no: result.aircraft_no,
-            airline: result.airline
-        });
+        res.status(200).json(await aircraft.getAircraftById(aircraftId));
     }catch (err) {
-        res.status(400).json({
-            msg: "Error"
-        });
+        res.status(400).json(err).send();
     }
 };
 
 // Create operation
 const createAircraft = async (req, res) => {
     try {
-
-        if (req.body.aircraft_id === "" || req.body.aircraft_id === undefined) {
-            return res.status(400).json({
-                msg: "Please provide aircraft id"
-            });
-        }
-
-        if (req.body.aircraft_no === "" || req.body.aircraft_no === undefined) {
-            return res.status(400).json({
-                msg: "Please provide aircraft no"
-            });
-        }
-
-        if (req.body.airline === "" || req.body.airline === undefined) {
-            return res.status(400).json({
-                msg: "Please provide airline"
-            });
-        }
-
-
-        const aircraft = new Aircraft({
+        const aircraftData = {
             aircraft_id: req.body.aircraft_id,
             aircraft_no: req.body.aircraft_no,
             airline: req.body.airline
-        });
-        const createAircraftResult = await aircraft.save();
+        };
 
-        res.status(201).json({
-            aircraft_id: createAircraftResult.aircraft_id,
-            aircraft_no: createAircraftResult.aircraft_no,
-            airline: createAircraftResult.airline
-        });
+        res.status(201).json(await aircraft.createAircraft(aircraftData));
 
     }catch (err) {
-        if (err.code === 11000) {
-            return res.status(400).json({
-                msg: "Duplicate entry"
-            }).send();
-        }
-        res.status(400).json({
-            msg: "Error"
-        }).send();
+        res.status(400).json(err).send();
     }
 };
 
 // Update operation
 const updateAircraft = async (req, res) => {
-    try {
-
-        if (req.body.aircraft_id === "" || req.body.aircraft_id === undefined) {
-            return res.status(400).json({
-                msg: "Please provide aircraft id"
-            });
-        }
-
-        if (req.body.aircraft_no === "" || req.body.aircraft_no === undefined) {
-            return res.status(400).json({
-                msg: "Please provide aircraft no"
-            });
-        }
-
-        if (req.body.airline === "" || req.body.airline === undefined) {
-            return res.status(400).json({
-                msg: "Please provide airline"
-            });
-        }
-
-
-
-        await Aircraft.findOneAndUpdate({ aircraft_id: req.body.aircraft_id }, {
+    try{
+        const aircraftData = {
+            aircraft_id: req.body.aircraft_id,
             aircraft_no: req.body.aircraft_no,
             airline: req.body.airline
-        });
-        res.status(200).json({
-            msg: "Aircraft successfully Updated"
-        });
+        };
+
+        res.status(200).json(await aircraft.updateAircraft(aircraftData));
 
     }catch (err) {
-        if (err.code === 11000) {
-            return res.status(400).json({
-                msg: "Duplicate entry"
-            }).send();
-        }
-        res.status(400).json({
-            msg: "Error"
-        }).send();
+        res.status(400).json(err).send();
     }
 };
 
 // Delete operation
 const deleteAircraft = async (req, res) => {
     try {
-        await Aircraft.deleteOne({ aircraft_id: req.params.aircraft_id });
-        return res.status(204).send();
+        await aircraft.deleteAircraft(req.params.aircraft_id);
+        res.status(204).send();
     }catch (err) {
-        res.status(400).json({
-            msg: "Error"
-        });
+        res.status(400).json(err);
     }
 };
 
