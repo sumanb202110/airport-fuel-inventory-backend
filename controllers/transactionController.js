@@ -1,10 +1,10 @@
 const transaction = require("../services/transaction.service");
 
 /**
- * This function is used to get transactions details from the database
- * 
- * @param {*} req 
- * @param {*} res 
+ * Get transaction details
+ * @function
+ * @param {Object} req 
+ * @param {Object} res 
  * @returns 
  */
 const getTransactions = async (req, res) => {
@@ -18,7 +18,12 @@ const getTransactions = async (req, res) => {
     }
 };
 
-// Read operation by id
+/**
+ * Get details of specific transaction.
+ * @function
+ * @param {Object} req 
+ * @param {Object} res 
+ */
 const getTransactionById = async (req, res) => {
     const transactionId = req.params.transaction_id;
     try {
@@ -29,7 +34,14 @@ const getTransactionById = async (req, res) => {
         res.status(400).json(err).send();
     }
 };
-// Create operation
+
+/**
+ * Create new transaction
+ * 
+ * @param {Object} req 
+ * @param {Object} res 
+ * @returns 
+ */
 const createTransaction = async (req, res) => {
     try {
         if (req.body.airport_id === "" || req.body.airport_id === undefined) {
@@ -78,7 +90,14 @@ const createTransaction = async (req, res) => {
 
 };
 
-// Update operation
+/**
+ * Update specific transaction details
+ * 
+ * @function
+ * @param {Object} req 
+ * @param {Object} res 
+ * @returns 
+ */
 const updateTransaction = async (req, res) => {
     try {
         if (req.body.airport_id === "" || req.body.airport_id === undefined) {
@@ -129,7 +148,13 @@ const updateTransaction = async (req, res) => {
     }
 };
 
-// Delete operation
+/**
+ * Delete specific transaction
+ * 
+ * @function
+ * @param {Object} req 
+ * @param {Object} res 
+ */
 const deleteTransaction = async (req, res) => {
     try {
         await transaction.deleteTransaction(req.params.transaction_id );
@@ -139,7 +164,13 @@ const deleteTransaction = async (req, res) => {
     }
 };
 
-// Transaction report
+/**
+ * Get transaction details report
+ * 
+ * @function
+ * @param {Object} req 
+ * @param {Object} res 
+ */
 const getTransactionsReport = async (req, res) => {
     try{
         res.status(200).json(await transaction.getTransactionsReport());
