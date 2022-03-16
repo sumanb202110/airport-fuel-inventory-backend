@@ -3,13 +3,18 @@ const jwt = require("jsonwebtoken");
 const Token = require("../models/token");
 const user = require("../services/user.service");
 
-// eslint-disable-next-line
-const jwtKey = process.env.JWT_KEY;
-// eslint-disable-next-line
-const jwtRefreshKey = process.env.JWT_REFRESH_KEY;
+const jwtKey = process.env.JWT_KEY;     // eslint-disable-line
+const jwtRefreshKey = process.env.JWT_REFRESH_KEY;      // eslint-disable-line
 const jwtexpirySecond = 60 * 120;
 
-// Login operation
+/**
+ * User login
+ * 
+ * @function
+ * @param {Object} req 
+ * @param {Object} res 
+ * @returns 
+ */
 const login = async (req, res) => {
     try {
         const result = await user.findUser(req.body.email);
@@ -55,7 +60,13 @@ const login = async (req, res) => {
     }
 };
 
-// Refresh operation
+/**
+ * Token Refresh
+ * 
+ * @function
+ * @param {Object} req 
+ * @param {Object} res 
+ */
 const refresh = async (req, res) => {
     try {
         // Generate jwt token
@@ -88,7 +99,13 @@ const refresh = async (req, res) => {
 };
 
 
-// Logout
+/**
+ * Logout user
+ * 
+ * @function
+ * @param {Object} req 
+ * @param {Object} res 
+ */
 const logout = async (req, res) => {
     // res.cookie("token", "", { maxAge: -100000 })
     await Token.deleteOne({ token: req.body.refreshToken });
@@ -97,7 +114,13 @@ const logout = async (req, res) => {
     }).send();
 };
 
-// Create operation
+/**
+ * Create new user
+ * 
+ * @function
+ * @param {Object} req 
+ * @param {Object} res 
+ */
 const createUser = async (req, res) => {
     // Email validation function
     const validateEmail = (email) => {
