@@ -2,6 +2,13 @@ const mongoose = require("mongoose");
 const User = require("../models/user");
 const Token = require("../models/token");
 
+/**
+ * Find user in database
+ * 
+ * @function
+ * @param {String} userEmail 
+ * @returns 
+ */
 const findUser = async (userEmail) => {
     try {
         const result = await User.find({ email: userEmail });
@@ -17,6 +24,13 @@ const findUser = async (userEmail) => {
     }
 };
 
+/**
+ * Save Refreshed token in database
+ * 
+ * @function
+ * @param {String} refreshToken 
+ * @returns 
+ */
 const saveRefreshToken = async (refreshToken) => {
     try {
         const refreshTokenDbObj = new Token({
@@ -32,6 +46,15 @@ const saveRefreshToken = async (refreshToken) => {
         };
     }
 };
+
+/**
+ * Replace refresh token in database
+ * 
+ * @function
+ * @param {String} oldRefreshToken 
+ * @param {String} refreshToken 
+ * @returns 
+ */
 const updateRefreshToken = async (oldRefreshToken, refreshToken) => {
     try {
         await Token.findOneAndUpdate({ token: oldRefreshToken },{token: refreshToken});
@@ -45,6 +68,13 @@ const updateRefreshToken = async (oldRefreshToken, refreshToken) => {
     }
 };
 
+/**
+ * Delete specific refresh token from database
+ * 
+ * @function
+ * @param {String} refreshToken 
+ * @returns 
+ */
 const deleteRefreshToken = async (refreshToken) => {
     try {
         await Token.deleteOne({token: refreshToken});
@@ -57,6 +87,13 @@ const deleteRefreshToken = async (refreshToken) => {
     }
 };
 
+/**
+ * Insert new user detils to the database
+ * 
+ * @function
+ * @param {Object} userData 
+ * @returns 
+ */
 const createUser = async (userData) => {
     try {
         const user = new User({

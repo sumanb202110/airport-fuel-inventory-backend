@@ -2,7 +2,18 @@ const mongoose = require("mongoose");
 const Transaction = require("../models/transaction");
 const Airport = require("../models/airport");
 
-
+/**
+ * Get all transaction details
+ * 
+ * @function
+ * @param {Number} page 
+ * @param {Number} count 
+ * @param {String} airportIds 
+ * @param {String} aircraftIds 
+ * @param {String} transactionTypes 
+ * @param {String} sortBy 
+ * @returns 
+ */
 const getTransactions = async (page, count, airportIds, aircraftIds, transactionTypes, sortBy) => {
     let aggregateArr = [
         {
@@ -110,6 +121,13 @@ const getTransactions = async (page, count, airportIds, aircraftIds, transaction
     }
 };
 
+/**
+ * Get details of specific transaction
+ * 
+ * @function
+ * @param {String} transactionId 
+ * @returns 
+ */
 const getTransactionById = async (transactionId) => {
     try {
         const result = await Transaction.findOne({ transaction_id: transactionId });
@@ -129,6 +147,13 @@ const getTransactionById = async (transactionId) => {
     }
 };
 
+/**
+ * Update transaction and airport details 
+ * 
+ * @function
+ * @param {Object} transactionData 
+ * @returns 
+ */
 const updateFuelInventory = async (transactionData) => {
     const transaction = {
         transaction_type: transactionData.transaction_type,
@@ -200,6 +225,12 @@ const updateFuelInventory = async (transactionData) => {
     }
 };
 
+/**
+ * Delete specific transaction
+ * 
+ * @function
+ * @param {String} transactionId 
+ */
 const deleteTransaction = async (transactionId) => {
     try {
         await Transaction.deleteOne({ transaction_id: transactionId });
@@ -210,6 +241,12 @@ const deleteTransaction = async (transactionId) => {
     }
 };
 
+/**
+ * Get transactions report
+ * 
+ * @function
+ * @returns 
+ */
 const getTransactionsReport = async () => {
 
     try {

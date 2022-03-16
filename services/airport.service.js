@@ -1,6 +1,14 @@
 const Airport = require("../models/airport");
 const Transaction = require("../models/transaction");
 
+/**
+ * Get all airport details
+ * 
+ * @function
+ * @param {Number} page 
+ * @param {Number} count 
+ * @returns 
+ */
 const getAirports = async (page, count) => {
     try {
         const result = await Airport.aggregate(
@@ -52,6 +60,15 @@ const getAirports = async (page, count) => {
     }
 };
 
+/**
+ * Get all transactions of a specific airport
+ * 
+ * @function
+ * @param {Number} page 
+ * @param {Number} count 
+ * @param {String} airportId 
+ * @returns 
+ */
 const getTransactionsByAirport = async (page, count, airportId) => {
     try {
         const result = await Transaction.find({ airport_id: airportId })
@@ -82,6 +99,13 @@ const getTransactionsByAirport = async (page, count, airportId) => {
     }
 };
 
+/**
+ * Get specific airport details
+ * 
+ * @function
+ * @param {String} airportId 
+ * @returns 
+ */
 const getAirportById = async (airportId) => {
     try {
         const result = await Airport.findOne({ airport_id: airportId });
@@ -98,6 +122,13 @@ const getAirportById = async (airportId) => {
     }
 };
 
+/**
+ * Create new airport
+ * 
+ * @function
+ * @param {String} airportData 
+ * @returns 
+ */
 const createAirport = async (airportData) => {
     try {
         const airport = new Airport({
@@ -128,6 +159,13 @@ const createAirport = async (airportData) => {
     }
 };
 
+/**
+ * Update specific airport details
+ * 
+ * @function
+ * @param {Object} airportData 
+ * @returns 
+ */
 const updateAirport = async (airportData) => {
     try {
         await Airport.findOneAndUpdate({ airport_id: airportData.airport_id },
@@ -153,6 +191,13 @@ const updateAirport = async (airportData) => {
     }
 };
 
+/**
+ * Delete specific airport
+ * 
+ * @function
+ * @param {String} airportId 
+ * @returns 
+ */
 const deleteAirport = async (airportId) => {
     try {
         await Airport.deleteOne({ airport_id: airportId });
@@ -164,6 +209,12 @@ const deleteAirport = async (airportId) => {
     }
 };
 
+/**
+ * Get airports report
+ * 
+ * @function
+ * @returns 
+ */
 const getAirportsReport = async () => {
     try {
         const resultAirportLTE20 = await Airport.aggregate(
