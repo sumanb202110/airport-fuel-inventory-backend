@@ -1,11 +1,12 @@
 const airport = require("../services/airport.service");
 
-
-
-
-
-
-// Read operation
+/**
+ * Get airport details
+ * 
+ * @function
+ * @param {Object} req 
+ * @param {Object} res 
+ */
 const getAirports = async (req, res) => {
     const page = req.query.page || 1;
     const count = req.query.count || 100;
@@ -16,7 +17,13 @@ const getAirports = async (req, res) => {
     }
 };
 
-// Read operation
+/**
+ * Get transaction details by airport
+ * 
+ * @function
+ * @param {Object} req 
+ * @param {Object} res 
+ */
 const getTransactionsByAirport = async (req, res) => {
     const page = req.query.page || 1;
     const count = req.query.count || 5;
@@ -29,7 +36,13 @@ const getTransactionsByAirport = async (req, res) => {
     }
 };
 
-// Read operation by id
+/**
+ * Get airport details of specific airport
+ * 
+ * @function
+ * @param {Object} req 
+ * @param {Object} res 
+ */
 const getAirportById = async (req, res) => {
     const airportId = req.params.airport_id;
     try {
@@ -39,7 +52,14 @@ const getAirportById = async (req, res) => {
     }
 };
 
-// Create operation
+/**
+ * Create new airport
+ * 
+ * @function
+ * @param {Object} req 
+ * @param {Object} res 
+ * @returns 
+ */
 const createAirport = async (req, res) => {
     try {
 
@@ -85,7 +105,14 @@ const createAirport = async (req, res) => {
     }
 };
 
-// Update operation
+/**
+ * Update specific airport details
+ * 
+ * @function
+ * @param {Object} req 
+ * @param {Object} res 
+ * @returns 
+ */
 const updateAirport = async (req, res) => {
     try {
 
@@ -131,7 +158,14 @@ const updateAirport = async (req, res) => {
     }
 };
 
-// Delete Airport
+/**
+ * Delete specific airport
+ * 
+ * @function
+ * @param {Object} req 
+ * @param {Object} res 
+ * @returns 
+ */
 const deleteAirport = async (req, res) => {
     try {
         await airport.deleteAirport(req.params.airport_id);
@@ -141,7 +175,13 @@ const deleteAirport = async (req, res) => {
     }
 };
 
-// Airport report
+/**
+ * Get airport report
+ * 
+ * @function
+ * @param {Object} req 
+ * @param {Object} res 
+ */
 const getAirportsReport = async (req, res) => {
     try {
         res.status(200).json(await airport.getAirportsReport()).send();

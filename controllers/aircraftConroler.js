@@ -1,8 +1,12 @@
 const aircraft = require("../services/aircraft.service");
 
-
-
-// Read operation
+/**
+ * Get aircraft details
+ * 
+ * @function
+ * @param {Object} req 
+ * @param {Object} res 
+ */
 const getAircrafts = async (req, res) => {
     const page = req.query.page || 1;
     const count = req.query.count || 100;
@@ -13,7 +17,13 @@ const getAircrafts = async (req, res) => {
     }
 };
 
-// Read operation by id
+/**
+ * Get details of specific aircraft
+ * 
+ * @function
+ * @param {Object} req 
+ * @param {Object} res 
+ */
 const getAircraftById = async (req, res) => {
     const aircraftId = req.params.aircraft_id;
     try {
@@ -23,7 +33,13 @@ const getAircraftById = async (req, res) => {
     }
 };
 
-// Create operation
+/**
+ * Create new aircraft
+ * 
+ * @function
+ * @param {Object} req 
+ * @param {Object} res 
+ */
 const createAircraft = async (req, res) => {
     try {
         const aircraftData = {
@@ -39,7 +55,13 @@ const createAircraft = async (req, res) => {
     }
 };
 
-// Update operation
+/**
+ * Update details of specific aircraft
+ * 
+ * @function
+ * @param {Object} req 
+ * @param {Object} res 
+ */
 const updateAircraft = async (req, res) => {
     try{
         const aircraftData = {
@@ -55,7 +77,13 @@ const updateAircraft = async (req, res) => {
     }
 };
 
-// Delete operation
+/**
+ * Delete specific aircraft
+ * 
+ * @function
+ * @param {Object} req 
+ * @param {Object} res 
+ */
 const deleteAircraft = async (req, res) => {
     try {
         await aircraft.deleteAircraft(req.params.aircraft_id);
