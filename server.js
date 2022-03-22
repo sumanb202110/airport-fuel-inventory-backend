@@ -3,6 +3,7 @@ const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const swaggerUI = require("swagger-ui-express");
 const swaggerDocument = require("./swagger.json");
+const logger = require("./logger");
 dotenv.config();
 
 const app = express();
@@ -35,5 +36,5 @@ app.use("/api/v1/transactions", transactionRouter);
 app.use("/api/v1/users", userRouter);
 
 app.listen(port, () => {
-    console.log(`Server starts at http://localhost:${port}`);
+    logger.info(`Server starts at http://localhost:${port}`);
 });
